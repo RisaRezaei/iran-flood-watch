@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iran Flood Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@500;600;700&family=Vazirmatn:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040d14; --surface:#0a1b26; --surface-2:#0d2230; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --ink:#e4f0f4; --ink-2:#a3bcc7; --ink-3:#6d8a97;
+  --teal:#2dd4bf; --blue:#38bdf8; --deep:#0e7490;
+  --l0:#6f8f9c; --l1:#fab219; --l2:#ec835a; --l3:#d03b3b;
+  --grid:#16303e; --axis:#24485a;
+  --sans:'IBM Plex Sans',system-ui,sans-serif; --display:'Sora','IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace; --fa:'Vazirmatn',Tahoma,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
+body{background:
+  radial-gradient(1200px 600px at 78% -10%, rgba(45,212,191,.10), transparent 60%),
+  radial-gradient(900px 500px at -10% 30%, rgba(56,189,248,.07), transparent 60%), var(--bg)}
+a{color:var(--teal)}
+.fa{font-family:var(--fa);direction:rtl;unicode-bidi:isolate}
+.wrap{max-width:1440px;margin:0 auto;padding:22px 26px 40px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px 28px;margin-bottom:20px}
+.brand{display:flex;gap:14px;align-items:center}
+.brand svg{flex:none}
+.brand h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.02em;margin:0;line-height:1.1}
+.brand .fa{display:block;color:var(--ink-2);font-size:14px;margin-top:4px;text-align:left}
+.issued{color:var(--ink-2);font-size:13px;margin-top:6px}
+.issued b{color:var(--ink);font-weight:500;font-family:var(--mono)}
+.stale{display:none;margin:0 0 16px;padding:10px 14px;border-radius:12px;border:1px solid rgba(250,178,25,.45);background:rgba(250,178,25,.08);color:var(--ink);font-size:13.5px}
+.stale b{color:#fab219}
+.dam{margin:-4px 0 0;font-size:12.5px;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start}
+.dam svg{flex:none;margin-top:2px}
+.counters{display:flex;gap:10px;flex-wrap:wrap}
+.counter{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);border-radius:14px;padding:10px 14px 9px;min-width:220px}
+.counter h3{margin:0 0 6px;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.counter .row{display:flex;gap:14px}
+.cnt{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:18px;color:var(--ink)}
+.cnt small{font-family:var(--sans);font-size:11px;color:var(--ink-3);display:block;line-height:1}
+.cnt.zero{opacity:.45}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:18px}
+.card{background:linear-gradient(180deg,rgba(13,34,48,.92),rgba(10,27,38,.96));border:1px solid var(--line);border-radius:18px;position:relative;overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px 0}
+.card-h h2{margin:0;font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{all:unset;cursor:pointer;font-size:12.5px;color:var(--ink-2);padding:5px 12px;border-radius:999px;display:inline-flex;gap:6px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.seg button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#map{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 16px 14px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.map-note{position:absolute;right:16px;bottom:44px;font-size:11px;color:var(--ink-3)}
+
+/* detail */
+.detail{padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px}
+.site-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.site-h h2{margin:0;font:600 22px/1.15 var(--display);letter-spacing:-.01em}
+.site-h .fa{display:block;color:var(--ink-2);font-size:15px;margin-top:5px;text-align:left}
+.site-h .sub{color:var(--ink-3);font-size:12.5px;margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;border-radius:999px;border:1px solid var(--line-2);font-weight:600;font-size:13px;white-space:nowrap;background:var(--bg)}
+.headline{margin:0;color:var(--ink);font-size:14.5px;max-width:62ch}
+.headline .m{font-family:var(--mono);font-size:13.5px}
+#chart,#probs{display:block;width:100%;height:auto;overflow:visible}
+.clegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--ink-2);margin-bottom:-6px}
+.clegend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;flex:none}
+.sw.ln{width:14px;height:2px;border-radius:1px}
+.sw.bd{width:14px;height:10px;border-radius:2px;background:linear-gradient(180deg,rgba(56,189,248,.2) 0 25%,rgba(56,189,248,.4) 25% 75%,rgba(56,189,248,.2) 75%)}
+.sw.bar{width:9px;height:11px;border-radius:2px 2px 0 0;background:#38bdf8}
+.sw.wh{width:2px;height:12px;background:#7dd3fc;opacity:.7}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fact{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.fact small{display:block;color:var(--ink-3);font-size:11px;letter-spacing:.04em}
+.fact b{font-family:var(--mono);font-weight:500;font-size:14px}
+.fact i{font-style:normal;color:var(--ink-3);font-size:11px;margin-left:3px}
+
+/* watch list */
+.list{grid-column:1 / -1}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(45,212,191,.05)}
+tbody tr[aria-selected="true"]{background:rgba(56,189,248,.09)}
+td .fa{color:var(--ink-3);margin-left:8px;font-size:12px}
+.lvl{display:inline-flex;align-items:center;gap:6px}
+.tbl-wrap{overflow-x:auto;padding:6px 6px 8px}
+.pbar{display:inline-block;width:46px;height:6px;border-radius:3px;background:var(--grid);vertical-align:middle;margin-right:6px;position:relative;overflow:hidden}
+.pbar i{position:absolute;inset:0 auto 0 0;border-radius:3px}
+
+/* method */
+.method{grid-column:1 / -1;padding:6px 18px 14px}
+details summary{cursor:pointer;list-style:none;padding:12px 0;font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'+';display:inline-block;width:16px;color:var(--teal)}
+details[open] summary::before{content:'–'}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;color:var(--ink-2);font-size:13.5px}
+.cols h4{margin:0 0 6px;color:var(--ink);font:600 14px/1.3 var(--display)}
+.cols p{margin:0 0 8px}
+.cols code{font-family:var(--mono);font-size:12px;color:var(--ink)}
+footer{color:var(--ink-3);font-size:12px;margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+
+/* tooltip */
+.tip{position:fixed;pointer-events:none;z-index:9;background:rgba(4,13,20,.96);border:1px solid var(--line-2);border-radius:10px;padding:8px 10px;font-size:12.5px;color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.45);opacity:0;transition:opacity .12s;max-width:280px}
+.tip .t{font-weight:600;margin-bottom:3px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--ink-2)}
+.tip .r b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+
+/* svg */
+.site{cursor:pointer}
+.site:focus{outline:none}
+.site:focus-visible .mk{stroke:var(--teal);stroke-width:2.5}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.25}}
+.lbl{font:500 11px var(--sans);fill:var(--ink);paint-order:stroke;stroke:#061620;stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
+.sea{font:italic 400 12px var(--sans);fill:#3f6b7d;letter-spacing:.06em;pointer-events:none}
+.ax text{fill:var(--ink-3);font:11px var(--mono)}
+.ax line,.ax path{stroke:var(--axis)}
+.gridl line{stroke:var(--grid)}
+.thr-l{font:11px var(--mono);fill:var(--ink-2)}
+.cap{font:11px var(--sans);fill:var(--ink-3)}
+
+@media (max-width:1020px){.grid{grid-template-columns:1fr}.cols{grid-template-columns:1fr}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.wrap{padding:16px 12px 30px}.counters{width:100%}.counter{min-width:0;flex:1 1 100%}.counter .row{justify-content:space-between;gap:6px}.map-note{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs>
+          <rect x="1" y="1" width="42" height="42" rx="13" fill="#0a1b26" stroke="rgba(255,255,255,.12)"/>
+          <path d="M22 8c5 6.5 8.5 11.2 8.5 15.3a8.5 8.5 0 0 1-17 0C13.5 19.2 17 14.5 22 8z" fill="url(#lg)" opacity=".95"/>
+          <path d="M9 31c3.2 0 3.2 2.4 6.5 2.4s3.3-2.4 6.5-2.4 3.3 2.4 6.5 2.4S31.8 31 35 31" fill="none" stroke="#e4f0f4" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1>Iran Flood Watch</h1>
+          <span class="fa" lang="fa">پایش و هشدار سیل ایران</span>
+        </div>
+      </div>
+      <div class="issued" id="issued"></div>
+    </div>
+    <div class="counters" id="counters"></div>
+  </header>
+
+  <div class="stale" id="stale" role="alert"></div>
+  <main class="grid">
+    <section class="card" aria-label="Map of forecast sites">
+      <div class="card-h">
+        <h2>Forecast sites</h2>
+        <div class="seg" role="group" aria-label="Layers">
+          <button type="button" data-layer="river" aria-pressed="true">River flood</button>
+          <button type="button" data-layer="rain" aria-pressed="true">Flash-flood rain</button>
+        </div>
+      </div>
+      <svg id="map" viewBox="0 0 900 760" role="img" aria-label="Map of Iran with forecast sites coloured by warning level"></svg>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card detail" id="detail" aria-live="polite"></section>
+
+    <section class="card list" aria-label="Watch list">
+      <div class="card-h">
+        <h2>Watch list</h2>
+        <div class="seg" role="group" aria-label="Rows shown">
+          <button type="button" data-rows="all" aria-pressed="true">All sites</button>
+          <button type="button" data-rows="alerts" aria-pressed="false">Alerts only</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table id="table"></table></div>
+    </section>
+
+    <section class="card method">
+      <details>
+        <summary>How the warnings are made</summary>
+        <div class="cols">
+          <div>
+            <h4>River floods</h4>
+            <p>Every day the 51-member GloFAS v4 ensemble forecasts river discharge 30 days ahead on a ~5 km river network. Each site sits on the modelled river nearest the town that carries a real share of the local flow.</p>
+            <p>Thresholds are the 2-, 5- and 20-year floods of the <em>same model's</em> own daily discharge (<span id="rspan"></span>), from a Gumbel fit (L-moments) to water-year (Oct–Sep) maxima. Comparing a model with its own climate removes its bias, which is how GloFAS itself issues flood signals — so flows are shown as multiples of the 2-year flood.</p>
+          </div>
+          <div>
+            <h4>Flash-flood rain</h4>
+            <p>Small, steep catchments flood faster than a 5 km river model can see, so cities with a flash-flood history are also tracked through rainfall: the 51-member ECMWF IFS ensemble (0.25°), summed over Iran local days and over 3-day windows, against the 2-, 5- and 20-year 1-day and 3-day rainfall of ERA5 (0.25°, <span id="pspan"></span>) computed the same way.</p>
+            <p>Rain alerts count days 1–<span id="rh"></span>; later days are shown faded. The page updates within about an hour of each new model run: GloFAS once a day, the ECMWF ensemble every 6 hours.</p>
+          </div>
+          <div>
+            <h4>Levels</h4>
+            <p id="levelrules"></p>
+            <p>Below large dams the real flow depends on release decisions; those sites are marked. <b>Not an official warning</b> — always follow the Iran Meteorological Organization and local crisis-management authorities.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <span>Data: GloFAS v4 (Copernicus Emergency Management Service) and ECMWF IFS ensemble via <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0); ERA5 (Copernicus Climate Change Service); boundaries © Natural Earth.</span>
+    <span>Replays of past floods: <a href="replay-2026-11.html">November 2026</a> · <a href="replay-2019.html">spring 2019</a> · Built by <a href="https://risarezaei.github.io/">P. Abbasalizadehrezaei</a></span>
+  </footer>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script id="snapshot" type="application/json">__SNAPSHOT__</script>
+<script id="topo" type="application/json">__TOPO__</script>
+<script>
+(() => {
+const S = JSON.parse(document.getElementById('snapshot').textContent);
+const T = JSON.parse(document.getElementById('topo').textContent);
+
+const LV = [
+  { name: 'Normal',   color: '#6f8f9c' },
+  { name: 'Moderate', color: '#fab219' },
+  { name: 'High',     color: '#ec835a' },
+  { name: 'Severe',   color: '#d03b3b' },
+];
+const RP_LABEL = { rp2: '2-year', rp5: '5-year', rp20: '20-year' };
+const RP_LVL = { rp2: 1, rp5: 2, rp20: 3 };
+
+// level shapes: circle, triangle, diamond, octagon — level is never told by colour alone
+function shapePath(level, r) {
+  if (level === 1) { const h = r * 1.25; return `M0,${-h}L${h * 0.95},${h * 0.7}L${-h * 0.95},${h * 0.7}Z`; }
+  if (level === 2) { const h = r * 1.3; return `M0,${-h}L${h},0L0,${h}L${-h},0Z`; }
+  if (level === 3) { const h = r * 1.12, a = h * 0.414; return `M${-a},${-h}L${a},${-h}L${h},${-a}L${h},${a}L${a},${h}L${-a},${h}L${-h},${a}L${-h},${-a}Z`; }
+  return `M${r},0A${r},${r} 0 1,1 ${-r},0A${r},${r} 0 1,1 ${r},0Z`;
+}
+const icon = (level, size = 14, hollow = false) =>
+  `<svg width="${size}" height="${size}" viewBox="-8 -8 16 16" aria-hidden="true"><path d="${shapePath(level, 5.2)}" fill="${hollow ? 'none' : LV[level].color}" stroke="${LV[level].color}" stroke-width="${hollow ? 2 : 0}"/></svg>`;
+
+const fmtNum = (v) => v == null ? '–' : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString('en-US') : (+v.toPrecision(3)).toLocaleString('en-US'));
+const pct = (p) => p == null ? '–' : `${Math.round(p * 100)}%`;
+const dayDate = (start, i) => { const d = new Date(start + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + i); return d; };
+const fmtDay = (d) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmtShort = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const tz = (S.config && S.config.timezone) || 'Asia/Tehran';
+const fmtTehran = (iso) => new Date(iso).toLocaleString('en-GB', { timeZone: tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const fmtRun = (iso) => `${new Date(iso).toISOString().slice(8, 10)} ${new Date(iso).toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })} ${new Date(iso).toISOString().slice(11, 13)}z`;
+const fmtX = (v) => v == null ? '–' : v >= 10 ? `${Math.round(v)}×` : v >= 0.1 ? `${(+v.toPrecision(2))}×` : v > 0 ? '<0.1×' : '0×';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const sites = [
+  ...S.river.map((s) => ({ ...s, kind: 'river', title: `${s.river} at ${s.place}`, faName: s.fa, unit: 'm³/s', lat: s.slat, lon: s.slon })),
+  ...S.rain.map((s) => ({ ...s, kind: 'rain', title: s.name, faName: s.fa, unit: 'mm/day' })),
+].filter((s) => !s.error);
+const failed = [...S.river, ...S.rain].filter((s) => s.error);
+const byKey = new Map(sites.map((s) => [`${s.kind}:${s.id}`, s]));
+const state = { layers: { river: true, rain: true }, rows: 'all', sel: null };
+
+// ---------- header ----------
+const issued = new Date(S.generated);
+document.getElementById('issued').innerHTML =
+  `Updated <b>${fmtTehran(S.generated)}</b> Tehran time` +
+  (S.runs ? ` · model runs: GloFAS <b>${fmtRun(S.runs.glofas.init)}</b>, ECMWF ensemble <b>${fmtRun(S.runs.ecmwf.init)}</b>` : '') +
+  (failed.length ? ` · <span style="color:var(--l1)">no data for ${failed.length} site${failed.length > 1 ? 's' : ''}</span>` : '');
+// Never let an old forecast look current: flag runs older than their normal update cycle
+if (S.runs && S.config.staleHours) {
+  const old = [['glofas', 'River forecast (GloFAS)'], ['ecmwf', 'Rain forecast (ECMWF ensemble)']]
+    .map(([k, label]) => [label, (Date.now() - Date.parse(S.runs[k].init)) / 3.6e6, S.config.staleHours[k]])
+    .filter(([, age, lim]) => age > lim);
+  if (old.length) {
+    const el = document.getElementById('stale');
+    el.innerHTML = `<b>Out of date.</b> ` + old.map(([label, age]) => `${label} is from a model run ${Math.round(age)} hours ago`).join('; ') +
+      `. New runs normally arrive every 6–24 hours, so this page has not been updated — do not rely on it until it is.`;
+    el.style.display = 'block';
+  }
+}
+const counterHtml = (label, arr) => `<div class="counter"><h3>${label}</h3><div class="row">` +
+  [3, 2, 1, 0].map((l) => `<div class="cnt ${arr[l] ? '' : 'zero'}" title="${LV[l].name}">${icon(l, 16)}<div>${arr[l]}<small>${LV[l].name}</small></div></div>`).join('') + '</div></div>';
+document.getElementById('counters').innerHTML =
+  counterHtml(`River sites · ${S.river.length}`, S.summary.river) + counterHtml(`Rain sites · ${S.rain.length}`, S.summary.rain);
+
+// method text
+const info = S.thresholdsInfo || {};
+document.getElementById('rspan').textContent = info.riverPeriod || '1997';
+document.getElementById('pspan').textContent = info.rainPeriod || '1992';
+document.getElementById('rh').textContent = S.config.rainAlertHorizon;
+document.getElementById('levelrules').innerHTML = S.config.levels.map((L) =>
+  `${icon(L.level)} <b>${L.label}</b>: on any day, at least ${Math.round(L.minProb * 100)}% of ensemble members above the ${RP_LABEL[L.rp]} level.`).join('<br>') +
+  `<br>${icon(0)} <b>Normal</b>: none of these.`;
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.opacity = 0; };
+const row = (k, v) => `<div class="r"><span>${k}</span><b>${v}</b></div>`;
+
+// ---------- map ----------
+const map = d3.select('#map');
+const W = 900, H = 760;
+const land = topojson.feature(T, T.objects.land);
+const iran = { type: 'FeatureCollection', features: land.features.filter((f) => f.properties.ADM0_A3 === 'IRN') };
+const proj = d3.geoConicConformal().parallels([28, 38]).rotate([-53.5, 0]).fitExtent([[24, 18], [W - 24, H - 18]], iran);
+const path = d3.geoPath(proj);
+const defs = map.append('defs');
+const gl = defs.append('radialGradient').attr('id', 'landg').attr('cx', '45%').attr('cy', '40%').attr('r', '75%');
+gl.append('stop').attr('offset', '0').attr('stop-color', '#123445');
+gl.append('stop').attr('offset', '1').attr('stop-color', '#0c2635');
+const glow = defs.append('filter').attr('id', 'glow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%');
+glow.append('feGaussianBlur').attr('stdDeviation', 6).attr('result', 'b');
+const fm = glow.append('feMerge'); fm.append('feMergeNode').attr('in', 'b'); fm.append('feMergeNode').attr('in', 'SourceGraphic');
+
+map.append('rect').attr('width', W).attr('height', H).attr('fill', '#06141e');
+map.append('path').datum(d3.geoGraticule().step([5, 5])()).attr('d', path).attr('fill', 'none').attr('stroke', '#0d2532').attr('stroke-width', 0.6);
+map.append('g').selectAll('path').data(land.features.filter((f) => f.properties.ADM0_A3 !== 'IRN')).join('path')
+  .attr('d', path).attr('fill', '#0a1d29').attr('stroke', '#12303f').attr('stroke-width', 0.7);
+map.append('path').datum(iran).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(45,212,191,.35)').attr('stroke-width', 6).attr('filter', 'url(#glow)');
+map.append('path').datum(iran).attr('d', path).attr('fill', 'url(#landg)');
+map.append('g').selectAll('path').data(topojson.feature(T, T.objects.prov).features).join('path')
+  .attr('d', path).attr('fill', 'none').attr('stroke', '#1f4a5c').attr('stroke-width', 0.6);
+map.append('g').selectAll('path').data(topojson.feature(T, T.objects.lakes).features).join('path')
+  .attr('d', path).attr('fill', '#06141e').attr('stroke', '#1b4252').attr('stroke-width', 0.6);
+map.append('path').datum(iran).attr('d', path).attr('fill', 'none').attr('stroke', '#2dd4bf').attr('stroke-opacity', 0.75).attr('stroke-width', 1.1);
+[['Caspian Sea', 51.4, 38.1], ['Persian Gulf', 51.0, 27.4], ['Gulf of Oman', 58.9, 24.9]].forEach(([n, lo, la]) => {
+  const [x, y] = proj([lo, la]);
+  map.append('text').attr('class', 'sea').attr('x', x).attr('y', y).attr('text-anchor', 'middle').text(n);
+});
+
+const gSites = map.append('g');
+const ruler = map.append('text').attr('class', 'lbl').attr('opacity', 0);
+const measure = (t) => { ruler.text(t); return ruler.node().getComputedTextLength() || t.length * 6; };
+const radius = (s) => [5, 6.5, 8, 9.5][s.level];
+function drawSites() {
+  const vis = sites.filter((s) => state.layers[s.kind]).sort((a, b) => a.level - b.level);
+  const g = gSites.selectAll('g.site').data(vis, (s) => `${s.kind}:${s.id}`).join((enter) => {
+    const e = enter.append('g').attr('class', 'site').attr('tabindex', 0).attr('role', 'button');
+    e.append('path').attr('class', 'halo');
+    e.append('path').attr('class', 'mk');
+    return e;
+  });
+  g.attr('transform', (s) => `translate(${proj([s.lon, s.lat])})`)
+    .attr('aria-label', (s) => `${s.title}: ${LV[s.level].name}`);
+  g.select('.halo').attr('d', (s) => shapePath(s.level, radius(s)))
+    .attr('fill', (s) => LV[s.level].color).attr('class', (s) => 'halo' + (s.level >= 2 ? ' pulse' : ''))
+    .attr('opacity', (s) => s.level >= 2 ? 0.5 : 0);
+  g.select('.mk').attr('d', (s) => shapePath(s.level, radius(s)))
+    .attr('fill', (s) => s.kind === 'river' ? LV[s.level].color : '#06141e')
+    .attr('stroke', (s) => s.kind === 'river' ? '#06141e' : LV[s.level].color)
+    .attr('stroke-width', (s) => s.kind === 'river' ? 2 : 2.4)
+    .attr('opacity', (s) => s.level === 0 ? 0.85 : 1);
+  g.on('click', (ev, s) => select(s))
+    .on('keydown', (ev, s) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(s); } })
+    .on('mousemove', (ev, s) => showTip(`<div class="t">${esc(s.title)}</div>` +
+      row(s.kind === 'river' ? 'River flood' : 'Flash-flood rain', `${LV[s.level].name}`) +
+      row('Max P(> 2-year)', pct(s.maxProb.rp2)) + row('Max P(> 5-year)', pct(s.maxProb.rp5)) + row('Province', esc(s.prov)), ev))
+    .on('mouseleave', hideTip);
+  // labels: alerts and the selected site, placed greedily so none collide
+  const labelled = vis.filter((s) => s.level > 0 || s === state.sel)
+    .sort((a, b) => (b === state.sel) - (a === state.sel) || b.level - a.level || b.score - a.score);
+  const boxes = vis.map((s) => { const [x, y] = proj([s.lon, s.lat]), r = radius(s) + 1; return [x - r, y - r, x + r, y + r]; });
+  const hit = (b) => b[0] < 4 || b[2] > W - 4 || b[1] < 4 || b[3] > H - 4 ||
+    boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+  const placed = [];
+  labelled.forEach((s) => {
+    const text = s.kind === 'river' ? `${s.river} · ${s.place}` : s.name;
+    const w = measure(text), h = 13, [x, y] = proj([s.lon, s.lat]), r = radius(s) + 5;
+    const opts = [[x + r, y + 4, 'start'], [x - r, y + 4, 'end'], [x, y - r - 2, 'middle'], [x, y + r + 11, 'middle']];
+    const box = ([tx, ty, a]) => { const x0 = a === 'start' ? tx : a === 'end' ? tx - w : tx - w / 2; return [x0 - 2, ty - h + 3, x0 + w + 2, ty + 3]; };
+    const own = boxes.findIndex((o) => Math.abs((o[0] + o[2]) / 2 - x) < 0.01 && Math.abs((o[1] + o[3]) / 2 - y) < 0.01);
+    const saved = own >= 0 ? boxes.splice(own, 1)[0] : null; // a label may not collide with its own marker test
+    let pick = opts.find((o) => !hit(box(o)));
+    if (!pick && s === state.sel) pick = opts[0];
+    if (saved) boxes.push(saved);
+    if (pick) { boxes.push(box(pick)); placed.push({ s, text, x: pick[0], y: pick[1], a: pick[2] }); }
+  });
+  gSites.selectAll('text.lbl').data(placed, (d) => `${d.s.kind}:${d.s.id}`).join('text').attr('class', 'lbl')
+    .attr('x', (d) => d.x).attr('y', (d) => d.y).attr('text-anchor', (d) => d.a).text((d) => d.text);
+  gSites.selectAll('circle.selring').data(state.sel && state.layers[state.sel.kind] ? [state.sel] : []).join('circle')
+    .attr('class', 'selring').attr('fill', 'none').attr('stroke', '#e4f0f4').attr('stroke-width', 1.5).attr('stroke-dasharray', '3 3')
+    .attr('r', (s) => radius(s) + 7).attr('cx', (s) => proj([s.lon, s.lat])[0]).attr('cy', (s) => proj([s.lon, s.lat])[1]);
+}
+document.getElementById('legend').innerHTML =
+  [0, 1, 2, 3].map((l) => `<span>${icon(l)}${LV[l].name}</span>`).join('') +
+  `<span style="margin-left:auto">${icon(0, 14)} filled = river point</span><span>${icon(0, 14, true)} outlined = rain point</span>`;
+
+// ---------- detail ----------
+const detail = document.getElementById('detail');
+function headline(s) {
+  const fcDay = (i) => fmtDay(dayDate(s.fcStart, i));
+  if (s.level > 0) {
+    const L = S.config.levels.find((x) => x.level === s.level);
+    const three = s.kind === 'rain' && s.trigger === '3-day';
+    const src = three ? s.fc3 : s.fc;
+    const p = src[{ rp2: 'pr2', rp5: 'pr5', rp20: 'pr20' }[L.rp]][s.levelDay];
+    const thing = s.kind === 'river' ? `the ${RP_LABEL[L.rp]} flood flow` : three ? `the ${RP_LABEL[L.rp]} 3-day rainfall (3 days ending)` : `the ${RP_LABEL[L.rp]} daily rainfall`;
+    let t = `<b>${LV[s.level].name} signal.</b> <span class="m">${pct(p)}</span> of ensemble members exceed ${thing} on ${fcDay(s.levelDay)}`;
+    if (s.firstAlertDay != null && s.firstAlertDay < s.levelDay) t += `; alert conditions start ${fcDay(s.firstAlertDay)}`;
+    const pk = s.kind === 'river' ? `${fmtX(s.fc.p50[s.peakDay] / s.thr.rp2)} the 2-year flood` : `${fmtNum(s.fc.p50[s.peakDay])} mm`;
+    return t + `. Peak of the median forecast: <span class="m">${pk}</span> on ${fcDay(s.peakDay)}.`;
+  }
+  const hz = s.kind === 'river' ? S.config.riverAlertHorizon : S.config.rainAlertHorizon;
+  let t = `<b>No ${s.kind === 'river' ? 'flood' : 'heavy-rain'} signal</b> in the next ${hz} days. Highest chance of passing the 2-year ${s.kind === 'river' ? 'flow' : 'rainfall (1-day or 3-day total)'}: <span class="m">${pct(s.maxProb.rp2)}</span>.`;
+  if (s.kind === 'river' && s.qNow != null) t += ` Flow today: <span class="m">${fmtX(s.nowRatio)}</span> the 2-year flood.`;
+  return t;
+}
+function renderDetail(s) {
+  const typeTxt = s.kind === 'river' ? `${esc(s.river)} river · ${esc(s.prov)}` : `Flash-flood rainfall point · ${esc(s.prov)}`;
+  const rec = s.top && s.top[0];
+  const fact = (k, v, unit) => `<div class="fact"><small>${k}</small><b>${typeof v === 'number' ? fmtNum(v) : v}</b><i>${unit}</i></div>`;
+  const since = s.kind === 'river' ? (info.riverStartYear || 1997) : (info.rainStartYear || 1992);
+  const recFact = rec ? `<div class="fact"><small>Largest ${s.kind === 'river' ? 'flow' : 'day'} since ${since}</small><b>${s.kind === 'river' ? fmtX(rec[1] / s.thr.rp2) : fmtNum(rec[1])}</b><i>${s.kind === 'river' ? '' : 'mm '}${fmtShort(new Date(rec[0] + 'T00:00:00Z'))} ${rec[0].slice(0, 4)}</i></div>` : '';
+  const facts = s.kind === 'river'
+    ? fact('2-year flood (model)', s.thr.rp2, 'm³/s') + fact('5-year flood', fmtX(s.thr.rp5 / s.thr.rp2), 'of 2-yr') + fact('20-year flood', fmtX(s.thr.rp20 / s.thr.rp2), 'of 2-yr') + recFact
+    : fact('2-year day', s.thr.rp2, 'mm') + fact('20-year day', s.thr.rp20, 'mm') + (s.thr3 ? fact('2-year 3 days', s.thr3.rp2, 'mm') : fact('5-year day', s.thr.rp5, 'mm')) + recFact;
+  detail.innerHTML = `
+    <div class="site-h">
+      <div><h2>${esc(s.title)}</h2><span class="fa" lang="fa">${esc(s.faName)}</span><div class="sub">${typeTxt}</div></div>
+      <span class="badge" style="border-color:${LV[s.level].color}">${icon(s.level, 15)} ${LV[s.level].name}</span>
+    </div>
+    <p class="headline">${headline(s)}</p>
+    ${s.dam ? `<p class="dam">${icon(0, 12, true)}<span>Below ${esc(s.dam)}: the real flow here also depends on reservoir releases, which the model only approximates.</span></p>` : ''}
+    <div class="clegend">${s.kind === 'river'
+      ? `<span><i class="sw ln" style="background:#a3bcc7"></i>model flow, past 14 days</span><span><i class="sw ln" style="background:#38bdf8"></i>median forecast</span><span><i class="sw bd"></i>middle 50% / 80% of members</span>`
+      : `<span><i class="sw bar"></i>median daily rain</span><span><i class="sw wh"></i>middle 80% of members</span>`}
+      <span><i class="sw ln" style="background:${LV[1].color}"></i><i class="sw ln" style="background:${LV[2].color};margin-left:-3px"></i><i class="sw ln" style="background:${LV[3].color};margin-left:-3px"></i>2-, 5-, 20-year levels</span></div>
+    <svg id="chart" viewBox="0 0 640 310" role="img" aria-label="Forecast chart"></svg>
+    <svg id="probs" viewBox="0 0 640 ${s.kind === 'rain' && s.fc3 ? 160 : 86}" role="img" aria-label="Daily exceedance probabilities"></svg>
+    <div class="facts">${facts}</div>`;
+  if (s.kind === 'river') riverChart(s); else rainChart(s);
+  probStrip(s);
+}
+
+const CM = { l: 54, r: 74, t: 26, b: 26 }, CW = 640, CH = 310;
+// Scale to the data so a calm forecast stays readable; pull the 2-year line in only when it is close
+const chartTop = (dataMax, rp2) => { const top = Math.max(dataMax * 1.15, rp2 * 0.02, 1e-3); return rp2 <= top * 2.5 ? Math.max(top, rp2 * 1.08) : top; };
+function thresholdLines(g, s, y, x0, x1, yMax) {
+  ['rp2', 'rp5', 'rp20'].forEach((k) => {
+    const v = s.thr[k], c = LV[RP_LVL[k]].color;
+    if (v <= yMax) {
+      g.append('line').attr('x1', x0).attr('x2', x1).attr('y1', y(v)).attr('y2', y(v)).attr('stroke', c).attr('stroke-width', 1).attr('stroke-opacity', 0.85);
+      g.append('rect').attr('x', x1 + 4).attr('y', y(v) - 4).attr('width', 8).attr('height', 8).attr('rx', 2).attr('fill', c);
+      g.append('text').attr('class', 'thr-l').attr('x', x1 + 16).attr('y', y(v) + 4).text(`${k.slice(2)}-yr`);
+    }
+  });
+  const off = ['rp2', 'rp5', 'rp20'].filter((k) => s.thr[k] > yMax);
+  if (off.length) g.append('text').attr('class', 'cap').attr('x', x1).attr('y', 10).attr('text-anchor', 'end')
+    .text(`↑ off scale: ${off.map((k) => `${k.slice(2)}-yr ${s.q2 ? fmtX(s.thr[k]) : fmtNum(s.thr[k]) + ' mm'}`).join(', ')}`);
+}
+
+function riverChart(s) {
+  const svg = d3.select('#chart');
+  const nP = s.past.q.length, nF = s.fc.p50.length;
+  const t0 = dayDate(s.past.start, 0), tEnd = dayDate(s.fcStart, nF - 1);
+  const x = d3.scaleUtc().domain([t0, tEnd]).range([CM.l, CW - CM.r]);
+  // plot as multiples of the model's own 2-year flood (what the warning is based on)
+  const q2 = s.thr.rp2, ix = (v) => (v == null ? null : v / q2);
+  s = { ...s, past: { ...s.past, q: s.past.q.map(ix) }, fc: { ...s.fc, p10: s.fc.p10.map(ix), p25: s.fc.p25.map(ix), p50: s.fc.p50.map(ix), p75: s.fc.p75.map(ix), p90: s.fc.p90.map(ix) },
+    thr: { rp2: 1, rp5: s.thr.rp5 / q2, rp20: s.thr.rp20 / q2 }, unit: '× 2-yr', q2 };
+  const dataMax = d3.max([...s.past.q, ...s.fc.p90].filter((v) => v != null)) || 0;
+  const yMax = chartTop(dataMax, s.thr.rp2);
+  const y = d3.scaleLinear().domain([0, yMax]).nice().range([CH - CM.b, CM.t]);
+  const yTop = y.domain()[1];
+  svg.append('g').attr('class', 'gridl').selectAll('line').data(y.ticks(5)).join('line')
+    .attr('x1', CM.l).attr('x2', CW - CM.r).attr('y1', y).attr('y2', y);
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${CH - CM.b})`)
+    .call(d3.axisBottom(x).ticks(d3.utcWeek.every(1)).tickFormat(d3.utcFormat('%-d %b')).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${CM.l},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickFormat((v) => `${d3.format('~g')(+v.toPrecision(2))}×`).tickSize(0).tickPadding(8)).call((g) => g.select('.domain').remove());
+  svg.append('text').attr('class', 'cap').attr('x', CM.l - 46).attr('y', 10).text('× 2-year flood');
+  const tIssue = dayDate(s.fcStart, 0);
+  svg.append('rect').attr('x', x(tIssue)).attr('y', CM.t).attr('width', x(tEnd) - x(tIssue)).attr('height', CH - CM.b - CM.t).attr('fill', 'rgba(56,189,248,.035)');
+  svg.append('line').attr('x1', x(tIssue)).attr('x2', x(tIssue)).attr('y1', CM.t).attr('y2', CH - CM.b).attr('stroke', '#3a6577');
+  svg.append('text').attr('class', 'cap').attr('x', x(tIssue) + 5).attr('y', CM.t + 11).text('forecast →');
+  const fd = s.fc.p50.map((_, i) => ({ t: dayDate(s.fcStart, i), i }));
+  const band = (lo, hi) => d3.area().x((d) => x(d.t)).y0((d) => y(s.fc[lo][d.i])).y1((d) => y(s.fc[hi][d.i])).curve(d3.curveMonotoneX);
+  svg.append('path').datum(fd).attr('d', band('p10', 'p90')).attr('fill', '#38bdf8').attr('fill-opacity', 0.12);
+  svg.append('path').datum(fd).attr('d', band('p25', 'p75')).attr('fill', '#38bdf8').attr('fill-opacity', 0.2);
+  thresholdLines(svg, s, y, CM.l, CW - CM.r, yTop);
+  const pd = s.past.q.map((q, i) => ({ t: dayDate(s.past.start, i), q })).filter((d) => d.q != null);
+  // join past to the first forecast day so the line is continuous
+  const line = d3.line().x((d) => x(d.t)).y((d) => y(d.q)).curve(d3.curveMonotoneX);
+  svg.append('path').datum([...pd, { t: fd[0].t, q: s.fc.p50[0] }]).attr('d', line).attr('fill', 'none').attr('stroke', '#a3bcc7').attr('stroke-width', 2).attr('stroke-linecap', 'round');
+  svg.append('path').datum(fd.map((d) => ({ t: d.t, q: s.fc.p50[d.i] }))).attr('d', line).attr('fill', 'none').attr('stroke', '#38bdf8').attr('stroke-width', 2).attr('stroke-linecap', 'round');
+  const pk = s.peakDay;
+  svg.append('circle').attr('cx', x(dayDate(s.fcStart, pk))).attr('cy', y(s.fc.p50[pk])).attr('r', 4.5).attr('fill', '#38bdf8').attr('stroke', '#0a1b26').attr('stroke-width', 2);
+  hoverLayer(svg, s, x, y, [...pd.map((d) => ({ t: d.t, past: d.q })), ...fd.map((d) => ({ t: d.t, i: d.i }))]);
+}
+
+function rainChart(s) {
+  const svg = d3.select('#chart');
+  const nF = s.fc.p50.length, hz = S.config.rainAlertHorizon;
+  const days = s.fc.p50.map((_, i) => i);
+  const x = d3.scaleBand().domain(days).range([CM.l, CW - CM.r]).padding(0.35);
+  const dataMax = d3.max(s.fc.p90.filter((v) => v != null)) || 0;
+  const yMax = chartTop(dataMax, s.thr.rp2);
+  const y = d3.scaleLinear().domain([0, yMax]).nice().range([CH - CM.b, CM.t]);
+  const yTop = y.domain()[1];
+  svg.append('g').attr('class', 'gridl').selectAll('line').data(y.ticks(5)).join('line').attr('x1', CM.l).attr('x2', CW - CM.r).attr('y1', y).attr('y2', y);
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${CH - CM.b})`)
+    .call(d3.axisBottom(x).tickValues(days.filter((d) => d % 2 === 0)).tickFormat((i) => fmtShort(dayDate(s.fcStart, i))).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${CM.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8)).call((g) => g.select('.domain').remove());
+  svg.append('text').attr('class', 'cap').attr('x', CM.l - 46).attr('y', 10).text('mm per day (Tehran time)');
+  if (hz < nF) {
+    const xs = x(hz) - x.step() * x.padding() / 2;
+    svg.append('rect').attr('x', xs).attr('y', CM.t).attr('width', CW - CM.r - xs).attr('height', CH - CM.b - CM.t).attr('fill', 'rgba(255,255,255,.025)');
+    svg.append('text').attr('class', 'cap').attr('x', xs + 5).attr('y', CH - CM.b - 6).text('lower skill — not used for alerts');
+  }
+  thresholdLines(svg, s, y, CM.l, CW - CM.r, yTop);
+  const bw = Math.min(24, x.bandwidth());
+  const g = svg.append('g');
+  days.forEach((i) => {
+    const cx = x(i) + x.bandwidth() / 2, op = i < hz ? 1 : 0.4;
+    g.append('line').attr('x1', cx).attr('x2', cx).attr('y1', y(s.fc.p10[i] ?? 0)).attr('y2', y(s.fc.p90[i] ?? 0)).attr('stroke', '#7dd3fc').attr('stroke-width', 1.5).attr('opacity', 0.55 * op);
+    const v = s.fc.p50[i] ?? 0, h = Math.max(0, y(0) - y(v)), r = Math.min(4, h);
+    g.append('path').attr('d', `M${cx - bw / 2},${y(0)}V${y(0) - h + r}Q${cx - bw / 2},${y(0) - h} ${cx - bw / 2 + r},${y(0) - h}H${cx + bw / 2 - r}Q${cx + bw / 2},${y(0) - h} ${cx + bw / 2},${y(0) - h + r}V${y(0)}Z`)
+      .attr('fill', '#38bdf8').attr('opacity', op);
+  });
+  const pts = days.map((i) => ({ t: i, i }));
+  hoverLayer(svg, s, (t) => x(t) + x.bandwidth() / 2, y, pts, true);
+}
+
+function hoverLayer(svg, s, x, y, pts, band = false) {
+  const g = svg.append('g').style('display', 'none');
+  const vl = g.append('line').attr('y1', CM.t).attr('y2', CH - CM.b).attr('stroke', '#e4f0f4').attr('stroke-opacity', 0.35);
+  const dot = g.append('circle').attr('r', 4.5).attr('fill', '#e4f0f4').attr('stroke', '#0a1b26').attr('stroke-width', 2);
+  const xs = pts.map((p) => x(p.t));
+  svg.append('rect').attr('x', CM.l).attr('y', CM.t).attr('width', CW - CM.l - CM.r).attr('height', CH - CM.t - CM.b).attr('fill', 'transparent')
+    .on('mousemove', (ev) => {
+      const [mx] = d3.pointer(ev);
+      let k = 0, best = Infinity; xs.forEach((v, i) => { const d = Math.abs(v - mx); if (d < best) { best = d; k = i; } });
+      const p = pts[k];
+      const v = p.past != null ? p.past : s.fc.p50[p.i];
+      g.style('display', null); vl.attr('x1', xs[k]).attr('x2', xs[k]); dot.attr('cx', xs[k]).attr('cy', y(v ?? 0));
+      const date = band ? dayDate(s.fcStart, p.i) : p.t;
+      let html = `<div class="t">${fmtDay(date)}</div>`;
+      const val = (v) => s.q2 ? `${fmtX(v)} (${fmtNum(v * s.q2)} m³/s)` : `${fmtNum(v)} ${s.unit}`;
+      const rng = (a, b) => s.q2 ? `${fmtX(a)} – ${fmtX(b)}` : `${fmtNum(a)} – ${fmtNum(b)}`;
+      if (p.past != null) html += row('Model flow', val(p.past));
+      else {
+        html += row('Median', val(s.fc.p50[p.i])) + row('80% range', rng(s.fc.p10[p.i], s.fc.p90[p.i])) +
+          row('P(> 2-yr)', pct(s.fc.pr2[p.i])) + row('P(> 5-yr)', pct(s.fc.pr5[p.i])) + row('P(> 20-yr)', pct(s.fc.pr20[p.i])) +
+          (s.fc3 ? row('3-day total, median', `${fmtNum(s.fc3.p50[p.i])} mm`) + row('P(3-day > 2-yr)', pct(s.fc3.pr2[p.i])) : '') +
+          row('Day level', `${LV[Math.max(s.fc.lvl[p.i], s.fc3 ? s.fc3.lvl[p.i] : 0)].name}`);
+      }
+      showTip(html, ev);
+    })
+    .on('mouseleave', () => { g.style('display', 'none'); hideTip(); });
+}
+
+function probStrip(s) {
+  const svg = d3.select('#probs');
+  const n = s.fc.p50.length, hz = s.kind === 'river' ? S.config.riverAlertHorizon : S.config.rainAlertHorizon;
+  const x = d3.scaleBand().domain(d3.range(n)).range([CM.l, CW - CM.r]).paddingInner(0.12);
+  const three = s.kind === 'rain' && s.fc3;
+  const rows = [['fc', 'pr2', 'rp2', '> 2-yr'], ['fc', 'pr5', 'rp5', '> 5-yr'], ['fc', 'pr20', 'rp20', '> 20-yr']];
+  if (three) rows.push(['fc3', 'pr2', 'rp2', '> 2-yr'], ['fc3', 'pr5', 'rp5', '> 5-yr'], ['fc3', 'pr20', 'rp20', '> 20-yr']);
+  const rh = 20;
+  svg.append('text').attr('class', 'cap').attr('x', CM.l).attr('y', 9).text(three
+    ? 'Share of ensemble members above each threshold — 1-day rain (top), 3-day rain (bottom)'
+    : 'Share of ensemble members above each threshold, per forecast day');
+  rows.forEach(([src, k, rp, lab], r) => {
+    const yy = 16 + r * (rh + 3) + (r >= 3 ? 6 : 0), c = LV[RP_LVL[rp]].color;
+    const arr = s[src][k];
+    if (three && (r === 0 || r === 3)) svg.append('text').attr('class', 'cap').attr('x', CW - CM.r + 8).attr('y', yy + 14).text(r === 0 ? '1 day' : '3 days');
+    svg.append('text').attr('class', 'thr-l').attr('x', CM.l - 8).attr('y', yy + 14).attr('text-anchor', 'end').text(lab);
+    svg.append('g').selectAll('rect').data(arr).join('rect')
+      .attr('x', (_, i) => x(i)).attr('y', yy).attr('width', x.bandwidth()).attr('height', rh).attr('rx', 3)
+      .attr('fill', (p) => p > 0 ? c : '#0f2a38').attr('fill-opacity', (p, i) => (p > 0 ? 0.15 + 0.85 * p : 1) * (i < hz ? 1 : 0.35))
+      .each(function (p, i) {
+        d3.select(this).on('mousemove', (ev) => showTip(`<div class="t">${fmtDay(dayDate(s.fcStart, i))}</div>` + row(`P(${src === 'fc3' ? '3-day ' : ''}${lab})`, pct(p)), ev)).on('mouseleave', hideTip);
+      });
+  });
+}
+
+// ---------- table ----------
+const table = document.getElementById('table');
+function renderTable() {
+  const rows = sites.filter((s) => state.rows === 'all' || s.level > 0).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+  const pb = (p, l) => `<span class="pbar"><i style="width:${Math.round(p * 100)}%;background:${LV[l].color}"></i></span>${pct(p)}`;
+  const when = (s) => s.firstAlertDay == null ? '<span style="color:var(--ink-3)">–</span>' : fmtShort(dayDate(s.fcStart, s.firstAlertDay));
+  table.innerHTML = `<thead><tr><th>Level</th><th>Site</th><th>Type</th><th>Province</th><th>Alert from</th><th class="num">Peak median</th><th class="num">P(&gt;2-yr)</th><th class="num">P(&gt;5-yr)</th><th class="num">P(&gt;20-yr)</th></tr></thead><tbody>` +
+    (rows.length ? rows.map((s) => `<tr data-key="${s.kind}:${s.id}" aria-selected="${state.sel === s}" tabindex="0">
+      <td><span class="lvl">${icon(s.level, 13, s.kind === 'rain')}${LV[s.level].name}</span></td>
+      <td>${esc(s.title)}<span class="fa" lang="fa">${esc(s.faName)}</span></td>
+      <td>${s.kind === 'river' ? 'River' : 'Rain'}</td><td>${esc(s.prov)}</td><td>${when(s)}</td>
+      <td class="num">${s.kind === 'river' ? `${fmtX(s.fc.p50[s.peakDay] / s.thr.rp2)} <span style="color:var(--ink-3)">2-yr</span>` : `${fmtNum(s.fc.p50[s.peakDay])} <span style="color:var(--ink-3)">mm</span>`}</td>
+      <td class="num">${pb(s.maxProb.rp2, 1)}</td><td class="num">${pb(s.maxProb.rp5, 2)}</td><td class="num">${pb(s.maxProb.rp20, 3)}</td></tr>`).join('')
+      : `<tr><td colspan="9" style="color:var(--ink-3);padding:18px 10px">No site is at Moderate or above today.</td></tr>`) + '</tbody>';
+  table.querySelectorAll('tbody tr[data-key]').forEach((tr) => {
+    const go = () => select(byKey.get(tr.dataset.key));
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  });
+}
+
+function select(s) {
+  state.sel = s;
+  try { if (location.hash !== `#${s.kind}-${s.id}`) history.replaceState(null, '', `#${s.kind}-${s.id}`); } catch (e) { /* sandboxed frame */ }
+  renderDetail(s); drawSites(); renderTable();
+}
+document.querySelectorAll('[data-layer]').forEach((b) => b.addEventListener('click', () => {
+  const k = b.dataset.layer; state.layers[k] = !state.layers[k]; b.setAttribute('aria-pressed', state.layers[k]); drawSites();
+}));
+document.querySelectorAll('[data-rows]').forEach((b) => b.addEventListener('click', () => {
+  state.rows = b.dataset.rows;
+  document.querySelectorAll('[data-rows]').forEach((o) => o.setAttribute('aria-pressed', o === b)); renderTable();
+}));
+
+// initial selection: link in the address, else the strongest signal
+const fromHash = location.hash.slice(1).replace('-', ':');
+const initial = byKey.get(fromHash) || [...sites].sort((a, b) => b.score - a.score || (b.nowRatio || 0) - (a.nowRatio || 0))[0];
+if (sites.some((s) => s.level > 0)) {
+  state.rows = 'alerts';
+  document.querySelectorAll('[data-rows]').forEach((o) => o.setAttribute('aria-pressed', o.dataset.rows === 'alerts'));
+}
+renderTable(); drawSites(); if (initial) select(initial);
+addEventListener('hashchange', () => { const s = byKey.get(location.hash.slice(1).replace('-', ':')); if (s && s !== state.sel) select(s); });
+})();
+</script>
+</body>
+</html>

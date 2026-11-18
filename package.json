@@ -1,0 +1,13 @@
+{
+  "name": "iran-flood-watch",
+  "version": "1.0.0",
+  "description": "Daily river-flood and flash-flood rainfall early warning for Iran from GloFAS and ECMWF ensembles",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node flood-watch.mjs",
+    "test": "node --test test/engine.test.mjs",
+    "thresholds": "node tools/build-thresholds.mjs"
+  }
+}
