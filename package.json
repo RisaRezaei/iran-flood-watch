@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Daily river-flood and flash-flood rainfall early warning for Iran from GloFAS and ECMWF ensembles",
   "type": "module",
-  "license": "MIT",
+  "license": "UNLICENSED",
+  "private": true,
+  "author": "Parisa Abbasalizadehrezaei (https://risarezaei.github.io)",
+  "homepage": "https://risarezaei.github.io/iran-flood-watch/",
   "engines": { "node": ">=18" },
   "scripts": {
     "start": "node flood-watch.mjs",

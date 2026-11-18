@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Builds a replay page of a past flood: each day runs the system's thresholds over GloFAS model
 // flow and ERA5 rainfall. For recent events it also replays the archived ECMWF forecasts issued
 // before the event (single-runs API), to show how many days ahead a warning would have appeared.

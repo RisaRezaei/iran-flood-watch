@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you refer to this work, please cite it as below. Reuse of the code needs the author's written permission (see LICENSE)."
+type: software
+title: "Iran Flood Watch: ensemble flood early warning for Iran"
+version: 1.0.0
+date-released: 2026-11-18
+authors:
+  - family-names: Abbasalizadehrezaei
+    given-names: Parisa
+    website: "https://risarezaei.github.io"
+repository-code: "https://github.com/RisaRezaei/iran-flood-watch"
+url: "https://risarezaei.github.io/iran-flood-watch/"
+license-url: "https://github.com/RisaRezaei/iran-flood-watch/blob/main/LICENSE"
+abstract: >-
+  Flood early-warning dashboard for Iran covering 29 river reaches and
+  27 flash-flood-prone cities. River warnings compare GloFAS v4 ensemble
+  discharge forecasts (51 members, 30 days) with Gumbel return levels of the
+  model's own climate; rainfall warnings compare ECMWF IFS ensemble 1-day and
+  3-day totals with ERA5 return levels. Updates hourly when a new model run is
+  available.
+keywords:
+  - flood early warning
+  - Iran
+  - GloFAS
+  - ECMWF ensemble
+  - flash floods
+  - return period

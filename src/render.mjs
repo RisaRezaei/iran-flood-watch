@@ -1,3 +1,4 @@
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 import { readFile } from 'node:fs/promises';
 
 const here = new URL('.', import.meta.url);

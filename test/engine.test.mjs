@@ -1,3 +1,4 @@
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {

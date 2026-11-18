@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Rebuild src/sites.json: snap river sites to the GloFAS network and compute 2/5/20/50-year
 // return levels for every site. Heavy on the API (long daily histories), so it paces itself;
 // expect roughly an hour. Run it again only if you add sites or want a newer climate period.

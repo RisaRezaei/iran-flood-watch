@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Iran Flood Watch — update run.
 //   node flood-watch.mjs                 fetch the newest forecasts → docs/index.html + docs/data/*
 //   node flood-watch.mjs --if-new        only fetch the part (river / rain) whose model has a new run;

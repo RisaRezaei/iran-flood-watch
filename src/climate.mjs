@@ -1,3 +1,4 @@
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Return levels from annual maxima: Gumbel (EV1) distribution fitted by L-moments.
 
 export function waterYearMaxima(time, values) {

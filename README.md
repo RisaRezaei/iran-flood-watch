@@ -55,15 +55,14 @@ npm test                             # unit tests
 
 A full update makes 58 requests, spaced 1.5 s apart, and takes about 2 minutes. That's well within Open-Meteo's free, non-commercial limits.
 
-## Run it automatically for free (GitHub Actions + Pages)
+## How the live site updates
 
-1. Push this folder to a new GitHub repository.
-2. **Settings → Pages**: deploy from the `main` branch, folder `/docs`.
-3. **Settings → Actions → General → Workflow permissions**: allow read and write.
-4. `.github/workflows/flood-watch.yml` checks every hour whether GloFAS or the ECMWF ensemble has a new run, and updates only when one does.
-   - Every new or rising alert opens a GitHub issue, and GitHub emails you about it.
-   - To start an update by hand: **Actions → Flood watch → Run workflow**.
-5. Optional instant phone alerts: install the free [ntfy](https://ntfy.sh) app, subscribe to a hard-to-guess topic name, and save that name as the repository secret `NTFY_TOPIC`. `NOTIFY_LEVEL` in the workflow sets the lowest level that alerts you (1 = Moderate).
+This repository runs itself on GitHub Actions and publishes to GitHub Pages from `main`, folder `/docs`:
+
+- `.github/workflows/flood-watch.yml` checks every hour whether GloFAS or the ECMWF ensemble has a new run, and updates only when one does.
+- Every new or rising alert opens a GitHub issue, which GitHub emails to the repository owner.
+- To start an update by hand: **Actions → Flood watch → Run workflow**.
+- Optional instant phone alerts: an [ntfy](https://ntfy.sh) topic saved as the repository secret `NTFY_TOPIC`. `NOTIFY_LEVEL` in the workflow sets the lowest level that alerts (1 = Moderate).
 
 ## Files
 
@@ -82,4 +81,16 @@ To add a site, append it to `src/stations.mjs` and run `node tools/build-thresho
 
 ## Data and credits
 
-GloFAS v4 (Copernicus Emergency Management Service) and the ECMWF IFS ensemble via [Open-Meteo](https://open-meteo.com) (CC BY 4.0); ERA5 (Copernicus Climate Change Service); boundaries © [Natural Earth](https://www.naturalearthdata.com). Code under the MIT license.
+GloFAS v4 (Copernicus Emergency Management Service) and the ECMWF IFS ensemble via [Open-Meteo](https://open-meteo.com) (CC BY 4.0); ERA5 (Copernicus Climate Change Service); boundaries © [Natural Earth](https://www.naturalearthdata.com). These sources keep their own terms.
+
+## Citation
+
+Use the **Cite this repository** button on GitHub, or:
+
+> Abbasalizadehrezaei, P. (2026). *Iran Flood Watch: ensemble flood early warning for Iran* (Version 1.0.0) [Software]. https://github.com/RisaRezaei/iran-flood-watch
+
+## Copyright
+
+© 2026 Parisa Abbasalizadehrezaei. All rights reserved.
+
+The code is public so that it can be read and cited. It is **not** open source: copying, modifying, hosting or reusing any part of it, in software, services, papers or anywhere else, needs the author's written permission. See [`LICENSE`](LICENSE). To ask, get in touch through [risarezaei.github.io](https://risarezaei.github.io).

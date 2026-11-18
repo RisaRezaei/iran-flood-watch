@@ -1,3 +1,4 @@
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Forecast sites. Coordinates are the town / reach of interest; tools/build-thresholds.mjs
 // snaps each river site to the largest GloFAS river cell within ±0.1° and stores the
 // snapped cell and its return levels in src/sites.json.

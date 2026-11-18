@@ -1,3 +1,4 @@
+// Copyright © 2026 Parisa Abbasalizadehrezaei. All rights reserved. See LICENSE.
 // Iran Flood Watch — warning engine
 // Runs unchanged in Node (>= 18) and in the browser: it only needs a global fetch().
 //
