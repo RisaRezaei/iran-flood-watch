@@ -2,10 +2,11 @@ name: Flood watch
 
 # Checks every hour whether GloFAS (new run daily, out ~12:40 UTC) or the ECMWF ensemble
 # (new run every 6 h, out ~9.5 h after its start) has published new data, and updates only then.
-# A warning therefore appears within about an hour of the forecast that contains it.
+# A warning therefore appears within about an hour of the forecast that contains it
+# (usually within 15-30 minutes).
 on:
   schedule:
-    - cron: '7 * * * *'
+    - cron: '52 * * * *'   # :52 catches ECMWF (~hh:24) and GloFAS (~12:38) sooner than :07 did
   workflow_dispatch:
     inputs:
       force:
