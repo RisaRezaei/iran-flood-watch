@@ -2,6 +2,8 @@
 
 A flood early-warning dashboard for Iran, built only from open data. It watches 29 river reaches and 27 flash-flood-prone cities. It updates within about an hour of every new model run and sends an alert as soon as a site reaches a warning level or moves up a level.
 
+[![Spring 2019 flood replay on 26 March: warning levels across Iran and the Kor river at Marvdasht passing its 20-year flood](docs/preview.png)](https://risarezaei.github.io/iran-flood-watch/replay-2019.html#d-2019-03-26)
+
 **Not an official warning service.** Always follow the Iran Meteorological Organization and local crisis-management authorities.
 
 ## What it does
