@@ -1,5 +1,5 @@
-Iran Flood Watch — updated 25 Nov 2026, 18:32 (Tehran time)
-Model runs: GloFAS 2026-11-25 00 UTC, ECMWF ensemble 2026-11-25 00 UTC
+Iran Flood Watch — updated 26 Nov 2026, 03:19 (Tehran time)
+Model runs: GloFAS 2026-11-25 00 UTC, ECMWF ensemble 2026-11-25 06 UTC
 Rivers: 0 severe, 0 high, 0 moderate, 29 normal
 Rainfall: 0 severe, 0 high, 0 moderate, 27 normal
 No site at or above the selected level.
