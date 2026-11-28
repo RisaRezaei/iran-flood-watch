@@ -1,0 +1,78 @@
+name: Rebuild thresholds
+
+# Rebuilds src/sites.json (return levels, river snapping, people at risk). The long daily
+# histories use a lot of Open-Meteo's free daily allowance, so the builder saves after every
+# site and stops cleanly at the limit; the daily schedule then carries on where it stopped, and
+# switches the river forecasts to GloFAS v5 once Open-Meteo serves it.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'What to rebuild'
+        type: choice
+        options: [auto, rain, river, glofas-v5, exposure]
+        default: auto
+      ids:
+        description: 'Only these site ids, space separated (optional)'
+        type: string
+        default: ''
+      all:
+        description: 'Also rebuild sites that are already complete'
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        if: inputs.target == 'exposure'
+        with:
+          python-version: '3.12'
+
+      - name: Build
+        env:
+          TARGET: ${{ inputs.target || 'auto' }}
+          IDS: ${{ inputs.ids }}
+          ALL: ${{ inputs.all && '--all' || '' }}
+        run: |
+          set +e
+          case "$TARGET" in
+            rain)      node tools/build-thresholds.mjs --rain $ALL $IDS ;;
+            river)     node tools/build-thresholds.mjs --river $ALL $IDS ;;
+            glofas-v5) node tools/build-thresholds.mjs --glofas 5 $ALL $IDS ;;
+            exposure)  pip install --quiet rasterio numpy && python tools/build_exposure.py ;;
+            auto)
+              node tools/build-thresholds.mjs --rain
+              code=$?; [ $code -ne 0 ] && [ $code -ne 3 ] && exit $code
+              # GloFAS v5: builds only once Open-Meteo serves it, otherwise says so and stops
+              node tools/build-thresholds.mjs --glofas 5 || echo "GloFAS v5 not available yet"
+              exit 0 ;;
+          esac
+          code=$?
+          if [ $code -eq 3 ]; then echo "Stopped at the API limit; tomorrow's run continues."; exit 0; fi
+          exit $code
+
+      - name: Commit
+        run: |
+          git config user.name "flood-watch-bot"
+          git config user.email "flood-watch-bot@users.noreply.github.com"
+          git add src/sites.json
+          git commit -m "Rebuild thresholds (${{ inputs.target || 'auto' }})" || { echo "nothing to commit"; exit 0; }
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
