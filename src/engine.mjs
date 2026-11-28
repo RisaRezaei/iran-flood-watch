@@ -77,7 +77,7 @@ const asList = (j) => (Array.isArray(j) ? j : [j]);
 export const tehranDate = (d, tz = CONFIG.timezone) => new Date(d).toLocaleDateString('en-CA', { timeZone: tz });
 
 export async function fetchJson(url, { log = () => {}, cfg = CONFIG } = {}) {
-  let wait = cfg.retryWaitMs;
+  let wait = cfg.retryWaitMs, quick = 0;
   for (let attempt = 0; attempt <= cfg.maxRetries; attempt++) {
     let body = null;
     try {
@@ -87,10 +87,13 @@ export async function fetchJson(url, { log = () => {}, cfg = CONFIG } = {}) {
       if (res.status === 404) throw new Error('not found');
     } catch (err) {
       if (err.message === 'not found') throw new Error(`Not found — ${url}`);
+      // a dropped keep-alive connection fails at once; trying again straight away fixes it
+      if (err instanceof TypeError && quick < 2) { quick++; attempt--; await sleep(1500); continue; }
       body = { reason: String(err) };
     }
     const reason = (body && body.reason) || 'unknown error';
-    if (attempt === cfg.maxRetries) throw new Error(`Request failed: ${reason} — ${url}`);
+    // hourly or daily allowance used up: waiting a minute or two will not help
+    if (attempt === cfg.maxRetries || /(hourly|daily) api request limit/i.test(reason)) throw new Error(`Request failed: ${reason} — ${url}`);
     log(`  retry in ${Math.round(wait / 1000)} s (${reason})`);
     await sleep(wait);
     wait = Math.min(wait * 2, 120000);
@@ -273,7 +276,9 @@ export async function runRiver(stations, { version = 4, model = null, log = () =
       log(`  FAILED: ${err.message}`);
       batch.forEach((st) => out.push({ ...st, error: err.message, level: null }));
     }
-    await sleep(cfg.requestGapMs);
+    // 51 members × 44 days per site: pace so the per-minute limit is never reached
+    const weight = batch.length * 51 * (cfg.weightPerMember || 0.31) * ((cfg.riverPastDays + cfg.riverForecastDays) / 14);
+    await sleep(Math.max(cfg.requestGapMs, (weight / (cfg.weightPerMinute || 450)) * 60000));
   }
   return out;
 }
