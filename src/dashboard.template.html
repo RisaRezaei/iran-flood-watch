@@ -346,9 +346,9 @@ const iran = { type: 'FeatureCollection', features: land.features.filter((f) => 
 const proj = d3.geoConicConformal().parallels([28, 38]).rotate([-53.5, 0]).fitExtent([[24, 18], [W - 24, H - 18]], iran);
 const path = d3.geoPath(proj);
 const defs = map.append('defs');
-const gl = defs.append('radialGradient').attr('id', 'landg').attr('cx', '45%').attr('cy', '40%').attr('r', '75%');
-gl.append('stop').attr('offset', '0').attr('stop-color', '#123445');
-gl.append('stop').attr('offset', '1').attr('stop-color', '#0c2635');
+const landGrad = defs.append('radialGradient').attr('id', 'landg').attr('cx', '45%').attr('cy', '40%').attr('r', '75%');
+landGrad.append('stop').attr('offset', '0').attr('stop-color', '#123445');
+landGrad.append('stop').attr('offset', '1').attr('stop-color', '#0c2635');
 const glow = defs.append('filter').attr('id', 'glow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%');
 glow.append('feGaussianBlur').attr('stdDeviation', 6).attr('result', 'b');
 const fm = glow.append('feMerge'); fm.append('feMergeNode').attr('in', 'b'); fm.append('feMergeNode').attr('in', 'SourceGraphic');
@@ -655,12 +655,12 @@ function probStrip(s) {
 function modelsChart(s) {
   const svg = d3.select('#models');
   const n = s.fc.p50.length, hz = S.config.rainAlertHorizon;
-  const x = d3.scaleBand().domain(d3.range(n)).range([CM.l + 70, CW - CM.r]).paddingInner(0.12);
+  const x = d3.scaleBand().domain(d3.range(n)).range([CM.l + 84, CW - CM.r]).paddingInner(0.12);
   svg.append('text').attr('class', 'cap').attr('x', CM.l - 46).attr('y', 9).text('Each model on its own: level reached per day');
   s.models.forEach((m, r) => {
     const y0 = 18 + r * 17, meta = MODEL[m.key] || { name: m.key };
     svg.append('text').attr('class', 'mname').attr('x', CM.l - 46).attr('y', y0 + 11).text(meta.name.replace('Met Office ', '').replace('Google ', ''));
-    if (meta.ai) svg.append('text').attr('class', 'cap').attr('x', CM.l + 62).attr('y', y0 + 11).attr('text-anchor', 'end').attr('fill', 'var(--teal)').style('fill', '#2dd4bf').text('AI');
+    if (meta.ai) svg.append('text').attr('class', 'cap').attr('x', CM.l + 78).attr('y', y0 + 11).attr('text-anchor', 'end').attr('fill', 'var(--teal)').style('fill', '#2dd4bf').text('AI');
     svg.append('g').selectAll('rect').data(d3.range(n)).join('rect')
       .attr('x', (i) => x(i)).attr('y', y0).attr('width', x.bandwidth()).attr('height', 13).attr('rx', 2)
       .attr('fill', (i) => m.lvl[i] == null ? 'transparent' : m.lvl[i] > 0 ? LV[m.lvl[i]].color : '#0f2a38')

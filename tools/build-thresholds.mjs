@@ -24,7 +24,7 @@ import { RIVER_SITES, RAIN_SITES, DAMS } from '../src/stations.mjs';
 const args = process.argv.slice(2);
 const has = (n) => args.includes(n);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
-const ids = new Set(args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1] === '--glofas')));
+const ids = new Set(args.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--glofas', '--shard'].includes(args[i - 1]))));
 const shardArg = opt('--shard');
 const [shardK, shardN] = shardArg ? shardArg.split('/').map(Number) : [0, 1];
 const order = new Map([...RAIN_SITES.map((r, i) => [r[0], i]), ...RIVER_SITES.map((r, i) => [r[0], i])]);
