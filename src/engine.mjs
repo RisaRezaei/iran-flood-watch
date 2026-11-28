@@ -23,13 +23,16 @@ export const CONFIG = {
   ensembleMetaBase: 'https://ensemble-api.open-meteo.com/data/',
   glofasVersions: [5, 4], // newest first
   rainModels: [
-    { key: 'ifs', id: 'ecmwf_ifs025_ensemble', meta: 'ecmwf_ifs025_ensemble', name: 'ECMWF IFS ENS', org: 'ECMWF', ai: false, staleHours: 30 },
-    { key: 'aifs', id: 'ecmwf_aifs025_ensemble', meta: 'ecmwf_aifs025_ensemble', name: 'ECMWF AIFS ENS', org: 'ECMWF', ai: true, staleHours: 30 },
-    { key: 'wn2', id: 'google_weathernext2_ensemble', meta: 'google_weathernext2_ensemble', name: 'Google WeatherNext 2', org: 'Google DeepMind', ai: true, staleHours: 42 },
-    { key: 'gefs', id: 'ncep_gefs025', meta: 'ncep_gefs025', name: 'NOAA GEFS', org: 'NOAA', ai: false, staleHours: 30 },
-    { key: 'icon', id: 'dwd_icon_global_eps', meta: 'dwd_icon_global_eps_native', name: 'DWD ICON-EPS', org: 'DWD', ai: false, staleHours: 42 },
-    { key: 'gem', id: 'cmc_gem_geps', meta: 'cmc_gem_geps', name: 'ECCC GEPS', org: 'Environment Canada', ai: false, staleHours: 42 },
-    { key: 'ukmo', id: 'ukmo_global_ensemble_20km', meta: 'ukmo_global_ensemble_20km', name: 'Met Office MOGREPS-G', org: 'UK Met Office', ai: false, staleHours: 30 },
+    // refreshHours: newest run is fetched when it is at least this much newer than the one held.
+    // The ECMWF pair is taken every 6 hours; the rest twice a day, which keeps the whole set inside
+    // Open-Meteo's free daily allowance (each member counts towards it).
+    { key: 'ifs', id: 'ecmwf_ifs025_ensemble', meta: 'ecmwf_ifs025_ensemble', name: 'ECMWF IFS ENS', org: 'ECMWF', ai: false, members: 51, refreshHours: 6, staleHours: 30 },
+    { key: 'aifs', id: 'ecmwf_aifs025_ensemble', meta: 'ecmwf_aifs025_ensemble', name: 'ECMWF AIFS ENS', org: 'ECMWF', ai: true, members: 51, refreshHours: 6, staleHours: 30 },
+    { key: 'wn2', id: 'google_weathernext2_ensemble', meta: 'google_weathernext2_ensemble', name: 'Google WeatherNext 2', org: 'Google DeepMind', ai: true, members: 64, refreshHours: 12, staleHours: 42 },
+    { key: 'gefs', id: 'ncep_gefs025', meta: 'ncep_gefs025', name: 'NOAA GEFS', org: 'NOAA', ai: false, members: 31, refreshHours: 12, staleHours: 42 },
+    { key: 'icon', id: 'dwd_icon_global_eps', meta: 'dwd_icon_global_eps_native', name: 'DWD ICON-EPS', org: 'DWD', ai: false, members: 40, refreshHours: 12, staleHours: 42 },
+    { key: 'gem', id: 'cmc_gem_geps', meta: 'cmc_gem_geps', name: 'ECCC GEPS', org: 'Environment Canada', ai: false, members: 21, refreshHours: 12, staleHours: 42 },
+    { key: 'ukmo', id: 'ukmo_global_ensemble_20km', meta: 'ukmo_global_ensemble_20km', name: 'Met Office MOGREPS-G', org: 'UK Met Office', ai: false, members: 18, refreshHours: 12, staleHours: 42 },
   ],
   landModel: 'ecmwf_ifs025_ensemble_mean', // soil moisture, snowfall, temperature, snowpack
   timezone: 'Asia/Tehran',
@@ -37,7 +40,7 @@ export const CONFIG = {
   riverForecastDays: 30,
   riverAlertHorizon: 30, // days that can raise a river alert
   rainPastDays: 2,       // the two days before today complete the first 3-day windows
-  rainForecastDays: 16,
+  rainForecastDays: 12,  // 2 past + 12 days keeps each request at Open-Meteo's base weight
   rainAlertHorizon: 10,  // rainfall skill drops fast after ~10 days
   // A day reaches a level when the (model-weighted) share of ensemble members above the
   // threshold is at least minProb. Checked from the most severe level down.
@@ -50,6 +53,8 @@ export const CONFIG = {
   riverBatch: 10,       // sites per request
   rainBatch: 9,
   requestGapMs: 4000,   // pause between requests (Open-Meteo fair-use limits)
+  weightPerMinute: 450, // stay under Open-Meteo's 600 weighted calls a minute
+  weightPerMember: 0.31, // measured: one location, one variable, 14 days ≈ 0.31 calls per member
   retryWaitMs: 20000,   // first back-off when the per-minute limit is hit
   maxRetries: 5,
 };
@@ -275,22 +280,23 @@ export async function runRiver(stations, { version = 4, model = null, log = () =
 
 // --------------------------------------------------------------------------------------- rain
 
-// Daily rain of every member of one model at every rain point
+// Daily precipitation of every member of one model at every rain point (one variable keeps the
+// request light; the rain/snow split comes from the ECMWF ensemble mean in fetchLand)
 export async function fetchRainModel(model, points, { log = () => {}, cfg = CONFIG } = {}) {
   const sites = {};
   for (const batch of chunks(points, cfg.rainBatch)) {
     const url = `${cfg.ensembleApi}?latitude=${batch.map((p) => p.lat)}&longitude=${batch.map((p) => p.lon)}` +
-      `&daily=precipitation_sum,snowfall_water_equivalent_sum&models=${model.id}&forecast_days=${cfg.rainForecastDays}` +
+      `&daily=precipitation_sum&models=${model.id}&forecast_days=${cfg.rainForecastDays}` +
       `&past_days=${cfg.rainPastDays}&timezone=${encodeURIComponent(cfg.timezone)}`;
     log(`rain   ${model.key}: ${batch.map((p) => p.id).join(', ')}`);
     const list = asList(await fetchJson(url, { log, cfg }));
     batch.forEach((p, k) => {
       const d = list[k].daily;
-      // p: precipitation, s: snowfall water equivalent (liquid rain = p − s; some models split
-      // rain from showers, so this is the one definition that works for all seven)
-      sites[p.id] = { time: d.time, p: memberSeries(d, 'precipitation_sum').map(r1), s: memberSeries(d, 'snowfall_water_equivalent_sum').map(r1) };
+      sites[p.id] = { time: d.time, p: memberSeries(d, 'precipitation_sum').map(r1) };
     });
-    await sleep(cfg.requestGapMs);
+    // pace by the request's weight so a model update never trips the per-minute limit
+    const weight = batch.length * (model.members || 51) * (cfg.weightPerMember || 0.31);
+    await sleep(Math.max(cfg.requestGapMs, (weight / (cfg.weightPerMinute || 450)) * 60000));
   }
   return sites;
 }
@@ -300,7 +306,7 @@ export async function fetchLand(points, { log = () => {}, cfg = CONFIG } = {}) {
   const sites = {};
   for (const batch of chunks(points, cfg.rainBatch)) {
     const url = `${cfg.ensembleApi}?latitude=${batch.map((p) => p.lat)}&longitude=${batch.map((p) => p.lon)}` +
-      `&daily=temperature_2m_mean,snowfall_water_equivalent_sum,soil_moisture_0_to_7cm_mean,soil_moisture_7_to_28cm_mean` +
+      `&daily=precipitation_sum,temperature_2m_mean,snowfall_water_equivalent_sum,soil_moisture_0_to_7cm_mean,soil_moisture_7_to_28cm_mean` +
       `&hourly=snow_depth_water_equivalent&models=${cfg.landModel}&forecast_days=${cfg.rainForecastDays}` +
       `&past_days=${cfg.rainPastDays}&timezone=${encodeURIComponent(cfg.timezone)}`;
     log(`land   ${batch.map((p) => p.id).join(', ')}`);
@@ -309,7 +315,7 @@ export async function fetchLand(points, { log = () => {}, cfg = CONFIG } = {}) {
       const d = list[k].daily, h = list[k].hourly || {};
       sites[p.id] = {
         time: d.time,
-        temp: r1(d.temperature_2m_mean), snowfall: r1(d.snowfall_water_equivalent_sum),
+        temp: r1(d.temperature_2m_mean), snowfall: r1(d.snowfall_water_equivalent_sum), precip: r1(d.precipitation_sum),
         sm1: d.soil_moisture_0_to_7cm_mean.map(sig), sm2: d.soil_moisture_7_to_28cm_mean.map(sig),
         swe0: (h.snow_depth_water_equivalent || [0])[0] ?? 0,
       };
@@ -328,7 +334,12 @@ export function combineRain(p, models, landSite, { cfg = CONFIG, today } = {}) {
   let land = null;
   if (landSite && p.soilRange && p.thrE) {
     const L = landState({ ...landSite, pack0: landSite.swe0 }, p.soilRange);
-    landSite.time.forEach((t, i) => landByDate.set(t, { w: L.w[i], share: L.share[i], melt: L.melt[i] }));
+    landSite.time.forEach((t, i) => {
+      // share of the day's precipitation that falls as snow (ECMWF ensemble mean), applied to every model
+      const pr = landSite.precip ? landSite.precip[i] : null, sf = landSite.snowfall[i] || 0;
+      const snowFrac = pr != null && pr > 0.2 ? Math.min(1, Math.max(0, sf / pr)) : (landSite.temp[i] != null && landSite.temp[i] < 0 ? 1 : 0);
+      landByDate.set(t, { w: L.w[i], share: L.share[i], melt: L.melt[i], snowFrac });
+    });
     land = L;
   }
   const dates = [...new Set(models.flatMap((m) => m.data.time.filter((t) => t >= today)))].sort().slice(0, cfg.rainForecastDays);
@@ -342,11 +353,10 @@ export function combineRain(p, models, landSite, { cfg = CONFIG, today } = {}) {
   // per model: member values for each target date
   const perModel = models.map((m) => {
     const idx = new Map(m.data.time.map((t, i) => [t, i]));
-    const E = m.data.p.map((ps, k) => ps.map((pv, i) => {
+    const E = m.data.p.map((ps) => ps.map((pv, i) => {
       const g = landByDate.get(m.data.time[i]);
       if (!g || pv == null) return null;
-      const snow = (m.data.s && m.data.s[k] && m.data.s[k][i]) || 0;
-      return effective(Math.max(0, pv - snow), g.melt, g.share);
+      return effective(pv * (1 - g.snowFrac), g.melt, g.share);
     }));
     const P3 = rollingSums(m.data.p, 3), E3 = rollingSums(E, 3);
     const byDate = dates.map((t) => {
@@ -437,6 +447,10 @@ export function combineRain(p, models, landSite, { cfg = CONFIG, today } = {}) {
   };
 }
 
+// A newer run is fetched once it is at least refreshHours newer than the one held
+export const needsFetch = (heldInit, newInit, model) =>
+  !!newInit && (!heldInit || (Date.parse(newInit) - Date.parse(heldInit)) / 3.6e6 >= (model.refreshHours || 6) - 0.01);
+
 export function usableModels(cache, runs, { cfg = CONFIG, now = new Date() } = {}) {
   return cfg.rainModels.filter((m) => {
     const c = cache.models && cache.models[m.key];
@@ -452,7 +466,7 @@ export async function runRain(points, runs, { cache = { models: {}, land: null }
     const r = runs.rain && runs.rain[m.key];
     if (!r || !r.init) { log(`rain   ${m.key}: no run information — skipped`); continue; }
     const c = cache.models[m.key];
-    if (!force && c && c.init === r.init && covered(c)) continue;
+    if (!force && c && covered(c) && !needsFetch(c.init, r.init, m)) continue;
     try {
       cache.models[m.key] = { init: r.init, fetched: now.toISOString(), sites: await fetchRainModel(m, points, { log, cfg }) };
     } catch (err) {
@@ -498,7 +512,12 @@ export function nothingNew(prev, runs, sites, { cfg = CONFIG, now = new Date() }
   if (!prev.thresholdsInfo || prev.thresholdsInfo.built !== sites.info.built) return false;
   const { use } = pickGlofas(runs.glofasLatest, sites, { cfg, now });
   if (prev.runs.glofas.version !== use.version || prev.runs.glofas.init !== use.init) return false;
-  for (const m of cfg.rainModels) if ((prev.runs.rain[m.key] || {}).init !== (runs.rain[m.key] || {}).init) return false;
+  const held = Object.fromEntries((prev.runs.used || []).map((u) => [u.key, u.init]));
+  for (const m of cfg.rainModels) {
+    const r = runs.rain[m.key];
+    if (!held[m.key] && r && r.init) return false;          // a model came back
+    if (needsFetch(held[m.key], r && r.init, m)) return false;
+  }
   // a new local day shifts the forecast days, so recompute once after midnight Tehran time
   return tehranDate(prev.generated, cfg.timezone) === tehranDate(now, cfg.timezone);
 }
@@ -521,7 +540,7 @@ export async function runAll(sites, { log = () => {}, cfg = CONFIG, now = new Da
       levels: cfg.levels,
       riverAlertHorizon: cfg.riverAlertHorizon,
       rainAlertHorizon: cfg.rainAlertHorizon,
-      rainModels: cfg.rainModels.map(({ key, name, org, ai, staleHours }) => ({ key, name, org, ai, staleHours })),
+      rainModels: cfg.rainModels.map(({ key, name, org, ai, members, refreshHours, staleHours }) => ({ key, name, org, ai, members, refreshHours, staleHours })),
       timezone: cfg.timezone,
       staleHours: cfg.staleHours,
     },

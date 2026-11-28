@@ -4,6 +4,8 @@
 
 import { waterYearMaxima, gumbelLmoments, landState, quantileOf, topSoil, effective, LAND } from './climate.mjs';
 
+const floorAt = (fitE, thr) => Object.fromEntries(['rp2', 'rp5', 'rp20', 'rp50'].map((k) => [k, +Math.max(fitE[k], LAND.floor * thr[k]).toFixed(1)]));
+
 export const RAIN_PERIOD = ['1991-10-01', '2024-09-30'];
 export const RAIN_VARS = 'precipitation_sum,snowfall_water_equivalent_sum,temperature_2m_mean,soil_moisture_0_to_7cm_mean,soil_moisture_7_to_28cm_mean';
 
@@ -26,7 +28,8 @@ export function rainThresholds(daily, { endDate = RAIN_PERIOD[1] } = {}) {
   const L = landState({ sm1, sm2, snowfall: snow, temp, pack0: 0 }, soilRange);
   const E = liquid.map((r, i) => effective(r, L.melt[i], L.share[i]));
   const P3 = roll3(P), E3 = roll3(E);
-  const thr = fit(time, P), thr3 = fit(time, P3), thrE = fit(time, E), thrE3 = fit(time, E3);
+  const thr = fit(time, P), thr3 = fit(time, P3), fitE = fit(time, E), fitE3 = fit(time, E3);
+  const thrE = floorAt(fitE, thr), thrE3 = floorAt(fitE3, thr3);
   // perfect-forecast check: days per year at or above the 2-year level, rain alone vs with ground
   let rainOnly = 0, withGround = 0;
   time.forEach((_, i) => {
@@ -39,7 +42,7 @@ export function rainThresholds(daily, { endDate = RAIN_PERIOD[1] } = {}) {
   return {
     nYears: years,
     annual: Math.round(P.filter((x) => x != null).reduce((a, b) => a + b, 0) / years),
-    thr, thr3, thrE, thrE3, soilRange,
+    thr, thr3, thrE, thrE3, thrEfit: { rp2: fitE.rp2, rp5: fitE.rp5, rp20: fitE.rp20 }, soilRange,
     snowmeltPerYear: Math.round(meltYear),
     top: topYears(time, P), top3: topYears(time, P3), topE: topYears(time, E),
     alertDaysPerYear: { rainOnly: +(rainOnly / years).toFixed(2), withGround: +(withGround / years).toFixed(2) },

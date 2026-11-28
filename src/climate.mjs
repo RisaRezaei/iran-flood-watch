@@ -46,6 +46,9 @@ export const LAND = {
   cm: 4.5,           // mm per °C per day (LISFLOOD default SnowMeltCoef)
   tmelt: 0,          // °C
   lo: 0.02, hi: 0.98, // soil wetness 0 and 1 = these quantiles of the site's own ERA5 record
+  // wet ground or snowmelt may lower the rain needed for a level by at most 30%: in dry climates
+  // the fitted wet-ground levels are tiny (a few mm), and drizzle on damp soil is not a flood risk
+  floor: 0.7,
 };
 
 export const topSoil = (sm1, sm2) =>
