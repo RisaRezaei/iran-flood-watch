@@ -38,6 +38,7 @@ const cfg = { ...CONFIG, retryWaitMs: 65000, maxRetries: 6 };
 const file = new URL('../src/sites.json', import.meta.url);
 const sites = JSON.parse(await readFile(file, 'utf8'));
 const save = () => writeFile(file, JSON.stringify(sites, null, 1));
+let changed = false;
 const tz = encodeURIComponent(CONFIG.timezone);
 
 class LimitReached extends Error {}
@@ -100,6 +101,7 @@ async function buildRiver(v) {
     else if (i >= 0) sites.river[i] = { ...sites.river[i], [`v${v}`]: part };
     sites.info.glofasModels = { ...(sites.info.glofasModels || {}), [v]: models.forecast };
     sites.info[`riverPeriodV${v}`] = `water years ${+from.slice(0, 4) + 1}–${to.slice(0, 4)}`;
+    changed = true;
     await save();
     await sleep(GAP);
   }
@@ -117,6 +119,7 @@ async function buildRain() {
     const site = { ...(have || {}), id, name, fa, prov, lat, lon, glat: +h.latitude.toFixed(3), glon: +h.longitude.toFixed(3), ...t };
     const i = sites.rain.findIndex((s) => s.id === id);
     sites.rain[i >= 0 ? i : sites.rain.length] = site;
+    changed = true;
     log(`  2-yr day ${t.thr.rp2} mm, wet-ground 2-yr ${t.thrE.rp2} mm; alert days/yr ${t.alertDaysPerYear.rainOnly} → ${t.alertDaysPerYear.withGround}`);
     await save();
     await sleep(GAP);
@@ -129,10 +132,11 @@ try {
   if (has('--rain')) await buildRain();
   if (has('--river')) await buildRiver(4);
   if (glofasV) await buildRiver(glofasV);
-  sites.info.built = new Date().toISOString().slice(0, 10);
-  await save();
-  log('done');
+  // a new date tells the update run to refetch everything with the new thresholds
+  if (changed) { sites.info.built = new Date().toISOString().slice(0, 10); await save(); }
+  log(changed ? 'done' : 'nothing to rebuild');
 } catch (err) {
+  if (changed) sites.info.built = new Date().toISOString().slice(0, 10);
   await save();
   if (err instanceof LimitReached) { log(`Stopped at the Open-Meteo limit (${err.message}); progress saved — run again later.`); process.exit(3); }
   throw err;
