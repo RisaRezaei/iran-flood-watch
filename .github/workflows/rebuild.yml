@@ -1,9 +1,10 @@
 name: Rebuild thresholds
 
 # Rebuilds src/sites.json (return levels, river snapping, people at risk). The long daily
-# histories use a lot of Open-Meteo's free daily allowance, so the builder saves after every
-# site and stops cleanly at the limit; the daily schedule then carries on where it stopped, and
-# switches the river forecasts to GloFAS v5 once Open-Meteo serves it.
+# histories use much of Open-Meteo's free daily allowance, so the work is split over three
+# runners, each saves after every site and stops cleanly at the limit, and the daily schedule
+# carries on where a build stopped. It also switches the river forecasts to GloFAS v5 once
+# Open-Meteo serves it. A final job folds the three builds into the current file.
 on:
   workflow_dispatch:
     inputs:
@@ -33,16 +34,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: actions/setup-python@v5
-        if: inputs.target == 'exposure'
+        if: inputs.target == 'exposure' && matrix.shard == 0
         with:
           python-version: '3.12'
 
@@ -51,28 +56,57 @@ jobs:
           TARGET: ${{ inputs.target || 'auto' }}
           IDS: ${{ inputs.ids }}
           ALL: ${{ inputs.all && '--all' || '' }}
+          SHARD: ${{ matrix.shard }}/3
         run: |
           set +e
           case "$TARGET" in
-            rain)      node tools/build-thresholds.mjs --rain $ALL $IDS ;;
-            river)     node tools/build-thresholds.mjs --river $ALL $IDS ;;
-            glofas-v5) node tools/build-thresholds.mjs --glofas 5 $ALL $IDS ;;
-            exposure)  pip install --quiet rasterio numpy && python tools/build_exposure.py ;;
+            rain)      node tools/build-thresholds.mjs --rain $ALL --shard $SHARD $IDS ;;
+            river)     node tools/build-thresholds.mjs --river $ALL --shard $SHARD $IDS ;;
+            glofas-v5) node tools/build-thresholds.mjs --glofas 5 $ALL --shard $SHARD $IDS ;;
+            exposure)
+              if [ "${{ matrix.shard }}" = "0" ]; then pip install --quiet rasterio numpy && python tools/build_exposure.py; else echo "exposure runs on one runner"; fi ;;
             auto)
-              node tools/build-thresholds.mjs --rain
+              node tools/build-thresholds.mjs --rain --shard $SHARD
               code=$?; [ $code -ne 0 ] && [ $code -ne 3 ] && exit $code
-              # GloFAS v5: builds only once Open-Meteo serves it, otherwise says so and stops
-              node tools/build-thresholds.mjs --glofas 5 || echo "GloFAS v5 not available yet"
+              # GloFAS v5: builds only once Open-Meteo serves it, otherwise says so
+              node tools/build-thresholds.mjs --glofas 5 --shard $SHARD || echo "GloFAS v5 not available yet"
               exit 0 ;;
           esac
           code=$?
-          if [ $code -eq 3 ]; then echo "Stopped at the API limit; tomorrow's run continues."; exit 0; fi
+          if [ $code -eq 3 ]; then echo "Stopped at the API limit; the next daily run continues."; exit 0; fi
           exit $code
 
-      - name: Commit
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sites-${{ matrix.shard }}
+          path: src/sites.json
+          retention-days: 3
+
+  commit:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: builds
+
+      - name: Merge and publish
         run: |
           git config user.name "flood-watch-bot"
           git config user.email "flood-watch-bot@users.noreply.github.com"
-          git add src/sites.json
-          git commit -m "Rebuild thresholds (${{ inputs.target || 'auto' }})" || { echo "nothing to commit"; exit 0; }
-          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
+          for i in 1 2 3 4 5; do
+            git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+            node tools/merge-sites.mjs builds/*/sites.json
+            git add src/sites.json
+            git commit -q -m "Rebuild thresholds (${{ inputs.target || 'auto' }})" || { echo "nothing to commit"; exit 0; }
+            git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep 7
+          done
+          echo "Could not push after 5 attempts"; exit 1

@@ -57,6 +57,7 @@ for kind in ('river', 'rain'):
         s['pop'] = {'n': int(round(n, -2)), 'r': RADIUS[kind]}
         print(f"{kind:5} {s['id']:24} {s['pop']['n']:>10,} within {RADIUS[kind]} km", flush=True)
 sites['info']['popSource'] = 'JRC GHSL GHS-POP R2023A, epoch 2025, 30 arc-seconds'
+sites['info']['touched'] = [{'kind': k, 'id': s['id'], 'fields': ['pop']} for k in ('river', 'rain') for s in sites[k]]
 sites['info']['built'] = __import__('datetime').date.today().isoformat()  # makes the next update pick it up
 SITES.write_text(json.dumps(sites, indent=1, ensure_ascii=False), encoding='utf-8')
 print('wrote', SITES)

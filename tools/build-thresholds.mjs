@@ -11,7 +11,9 @@
 //   node tools/build-thresholds.mjs --river                 river sites on GloFAS v4
 //   node tools/build-thresholds.mjs --glofas 5              river sites on GloFAS v5 (stored as site.v5)
 //   node tools/build-thresholds.mjs --rain tehran shiraz    only these ids
-// Exit code 3 means "stopped at the API limit, run again later".
+//   node tools/build-thresholds.mjs --rain --all --shard 1/3   every third site (parallel runners)
+// Exit code 3 means "stopped at the API limit, run again later". The ids it rebuilt are listed in
+// sites.info.touched, so tools/merge-sites.mjs can fold parallel builds into one file.
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { fetchJson, CONFIG } from '../src/engine.mjs';
@@ -23,7 +25,10 @@ const args = process.argv.slice(2);
 const has = (n) => args.includes(n);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const ids = new Set(args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1] === '--glofas')));
-const want = (id) => !ids.size || ids.has(id);
+const shardArg = opt('--shard');
+const [shardK, shardN] = shardArg ? shardArg.split('/').map(Number) : [0, 1];
+const order = new Map([...RAIN_SITES.map((r, i) => [r[0], i]), ...RIVER_SITES.map((r, i) => [r[0], i])]);
+const want = (id) => (!ids.size || ids.has(id)) && (order.get(id) ?? 0) % shardN === shardK;
 const glofasV = +(opt('--glofas') || 0);
 
 const RIVER_PERIOD = { 4: ['1996-10-01', '2024-09-30'], 5: ['1980-10-01', '2025-09-30'] };
@@ -39,6 +44,8 @@ const file = new URL('../src/sites.json', import.meta.url);
 const sites = JSON.parse(await readFile(file, 'utf8'));
 const save = () => writeFile(file, JSON.stringify(sites, null, 1));
 let changed = false;
+sites.info.touched = [];
+const touch = (kind, id) => { changed = true; sites.info.touched.push({ kind, id }); };
 const tz = encodeURIComponent(CONFIG.timezone);
 
 class LimitReached extends Error {}
@@ -101,7 +108,7 @@ async function buildRiver(v) {
     else if (i >= 0) sites.river[i] = { ...sites.river[i], [`v${v}`]: part };
     sites.info.glofasModels = { ...(sites.info.glofasModels || {}), [v]: models.forecast };
     sites.info[`riverPeriodV${v}`] = `water years ${+from.slice(0, 4) + 1}–${to.slice(0, 4)}`;
-    changed = true;
+    touch('river', id);
     await save();
     await sleep(GAP);
   }
@@ -119,7 +126,7 @@ async function buildRain() {
     const site = { ...(have || {}), id, name, fa, prov, lat, lon, glat: +h.latitude.toFixed(3), glon: +h.longitude.toFixed(3), ...t };
     const i = sites.rain.findIndex((s) => s.id === id);
     sites.rain[i >= 0 ? i : sites.rain.length] = site;
-    changed = true;
+    touch('rain', id);
     log(`  2-yr day ${t.thr.rp2} mm, wet-ground 2-yr ${t.thrE.rp2} mm; alert days/yr ${t.alertDaysPerYear.rainOnly} → ${t.alertDaysPerYear.withGround}`);
     await save();
     await sleep(GAP);
