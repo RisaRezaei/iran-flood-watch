@@ -11,122 +11,145 @@
 <link rel="alternate" type="application/atom+xml" title="Iran Flood Watch CAP alerts" href="cap/index.atom">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@500;600;700&family=Vazirmatn:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@500;600;700&family=Vazirmatn:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#040d14; --panel:rgba(9,25,35,.72); --panel-2:#0b2130; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
+  --bg:#040d14; --bg-2:#071520; --panel:#0a1b26; --panel-2:#0d2230; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
   --ink:#e4f0f4; --ink-2:#a3bcc7; --ink-3:#6d8a97;
-  --teal:#2dd4bf; --blue:#38bdf8; --deep:#0e7490;
-  --l0:#6f8f9c; --l1:#fab219; --l2:#ec835a; --l3:#d03b3b;
+  --teal:#2dd4bf; --blue:#38bdf8;
+  --l0:#6f8f9c; --l1:#f5c518; --l2:#f08a3e; --l3:#e0393e;
   --grid:#16303e; --axis:#24485a;
   --sans:'IBM Plex Sans',system-ui,sans-serif; --display:'Sora','IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace; --fa:'Vazirmatn',Tahoma,sans-serif;
+  --bar:60px; --days:66px; --side:500px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
-body{background:
-  radial-gradient(1200px 600px at 78% -10%, rgba(45,212,191,.10), transparent 60%),
-  radial-gradient(900px 500px at -10% 30%, rgba(56,189,248,.07), transparent 60%), var(--bg)}
 a{color:var(--teal)}
+button{font:inherit}
 .fa{font-family:var(--fa);direction:rtl;unicode-bidi:isolate}
-.wrap{max-width:1440px;margin:0 auto;padding:22px 26px 40px}
 
-/* header */
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px 28px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
-.brand{display:flex;gap:14px;align-items:center}
-.brand svg{flex:none}
-.brand h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.02em;margin:0;line-height:1.1}
-.brand .fa{display:block;color:var(--ink-2);font-size:14px;margin-top:4px;text-align:left}
-.issued{color:var(--ink-2);font-size:13px;margin-top:8px;max-width:78ch}
-.issued b{color:var(--ink);font-weight:500;font-family:var(--mono)}
-.issued .runs{color:var(--ink-3)}
-.stale{display:none;margin:0 0 16px;padding:10px 14px;border-left:3px solid #fab219;background:rgba(250,178,25,.08);color:var(--ink);font-size:13.5px}
-.stale b{color:#fab219}
-.dam{margin:-4px 0 0;font-size:12.5px;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start}
-.dam svg{flex:none;margin-top:2px}
-.counters{display:flex;gap:0;flex-wrap:wrap}
-.counter{padding:2px 22px 2px 0;margin-right:22px;border-right:1px solid var(--line)}
-.counter:last-child{border-right:0;margin-right:0;padding-right:0}
-.counter h3{margin:0 0 7px;font:500 13px/1 var(--display);color:var(--ink-2)}
-.counter .row{display:flex;gap:14px}
-.cnt{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:18px;color:var(--ink)}
-.cnt small{font-family:var(--sans);font-size:11px;color:var(--ink-3);display:block;line-height:1}
-.cnt.zero{opacity:.45}
+/* ---------- app frame: top bar, day strip, map + side panel ---------- */
+.app{display:flex;flex-direction:column;height:100vh;min-height:640px}
+.bar{height:var(--bar);flex:none;display:flex;align-items:center;gap:18px;padding:0 18px;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);flex:none}
+.brand h1{margin:0;font:700 19px/1 var(--display);letter-spacing:-.015em}
+.brand .fa{display:block;font-size:12.5px;color:var(--ink-2);margin-top:3px;text-align:left}
+.search{flex:1 1 auto;max-width:460px;display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;background:var(--bg);border:1px solid var(--line-2);border-radius:19px}
+.search:focus-within{border-color:var(--teal)}
+.search input{all:unset;flex:1;font-size:14px;color:var(--ink)}
+.search input::placeholder{color:var(--ink-3)}
+.status{margin-left:auto;text-align:right;font-size:12px;color:var(--ink-3);line-height:1.35}
+.status b{color:var(--ink);font:500 12px var(--mono)}
+.status .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 3px rgba(45,212,191,.18)}
+.navlink{flex:none;font-size:13px;color:var(--ink-2);text-decoration:none;padding:6px 0;border-bottom:1px solid transparent}
+.navlink:hover{color:var(--ink);border-bottom-color:var(--teal)}
+.stale{display:none;padding:8px 18px;background:rgba(245,197,24,.1);border-bottom:1px solid rgba(245,197,24,.45);font-size:13px}
+.stale b{color:var(--l1)}
 
-/* layout */
-.grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:18px}
-.card{background:var(--panel);border:1px solid var(--line);border-top:2px solid rgba(45,212,191,.35);position:relative;overflow:hidden}
-.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px 0}
-.card-h h2{margin:0;font:600 15px/1.2 var(--display);color:var(--ink)}
-.seg{display:inline-flex;gap:14px}
-.seg button{all:unset;cursor:pointer;font-size:13px;color:var(--ink-3);padding:4px 0;border-bottom:2px solid transparent}
-.seg button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--teal)}
-.seg button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
-#map{display:block;width:100%;height:auto}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 16px 14px;font-size:12px;color:var(--ink-2)}
+/* day strip (one tab per day, coloured by that day's highest warning) */
+.days{height:var(--days);flex:none;display:flex;overflow-x:auto;background:var(--bg-2);border-bottom:1px solid var(--line);scrollbar-width:thin}
+.day{all:unset;cursor:pointer;flex:0 0 auto;min-width:104px;padding:9px 14px 8px;border-right:1px solid var(--line);border-top:3px solid transparent;display:flex;flex-direction:column;gap:3px}
+.day:hover{background:rgba(255,255,255,.03)}
+.day[aria-selected="true"]{background:var(--panel);box-shadow:inset 0 -2px 0 var(--teal)}
+.day .d{font:600 13px/1 var(--display);color:var(--ink)}
+.day .s{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.day.first{min-width:150px}
+.day:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+
+.stage{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) var(--side)}
+.mapwrap{position:relative;min-height:0;overflow:hidden;background:#06141e}
+#map{display:block;width:100%;height:100%;cursor:grab}
+#map:active{cursor:grabbing}
+.ctl{position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:8px}
+.ctl .grp{display:flex;flex-direction:column;background:rgba(7,21,32,.92);border:1px solid var(--line-2);border-radius:6px;overflow:hidden}
+.ctl button{all:unset;cursor:pointer;width:38px;height:36px;display:grid;place-items:center;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.ctl button:last-child{border-bottom:0}
+.ctl button:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+.ctl button[aria-pressed="false"]{opacity:.38}
+.ctl button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.legend{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;padding:8px 12px;background:rgba(7,21,32,.9);border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--ink-2);max-width:calc(100% - 200px)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.play{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(7,21,32,.92);border:1px solid var(--line-2);border-radius:6px;color:var(--ink);cursor:pointer;font-size:13px}
+.play:hover{border-color:var(--teal)}
+.nowarn{position:absolute;left:50%;top:16px;transform:translateX(-50%);pointer-events:none;text-align:center;padding:14px 22px;background:rgba(4,13,20,.72);border:1px solid var(--line);border-radius:6px;opacity:0;transition:opacity .25s}
+.nowarn b{display:block;font:600 20px var(--display)}
+.nowarn span{font-size:13px;color:var(--ink-2)}
+.nowarn .fa{display:block;font-size:14px;color:var(--ink-2);margin-top:2px}
 
-/* detail */
-.detail{padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px}
+/* side panel */
+.panel{min-height:0;overflow-y:auto;background:var(--panel);border-left:1px solid var(--line);scrollbar-width:thin}
+.ph{position:sticky;top:0;z-index:2;background:var(--panel);padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.ph h2{margin:0;font:600 18px/1.2 var(--display)}
+.ph .sub{color:var(--ink-3);font-size:12.5px;margin-top:4px}
+.back{all:unset;cursor:pointer;font-size:12.5px;color:var(--teal);margin-bottom:8px;display:inline-flex;gap:6px;align-items:center}
+.back:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.empty{padding:26px 18px;color:var(--ink-2);font-size:14px}
+.empty b{display:block;color:var(--ink);font:600 17px var(--display);margin-bottom:6px}
+.grouph{padding:12px 18px 6px;font:600 13px var(--display);color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.wrow{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 18px 10px 15px;border-left:3px solid;border-bottom:1px solid var(--line)}
+.wrow:hover{background:rgba(255,255,255,.035)}
+.wrow:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.wrow .n{font-weight:600;font-size:14px}
+.wrow .n .fa{font-weight:400;color:var(--ink-3);margin-left:8px;font-size:13px}
+.wrow .m{grid-column:1;font-size:12.5px;color:var(--ink-3)}
+.wrow .p{grid-row:1 / span 2;grid-column:2;align-self:center;text-align:right;font:500 13px var(--mono);color:var(--ink)}
+.wrow .p small{display:block;font:11px var(--sans);color:var(--ink-3)}
+.quiet{padding:12px 18px 18px;font-size:12.5px;color:var(--ink-3)}
+
+/* site detail */
+.detail{padding:14px 18px 22px;display:flex;flex-direction:column;gap:12px}
 .site-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.site-h h2{margin:0;font:600 22px/1.15 var(--display);letter-spacing:-.01em}
-.site-h .fa{display:block;color:var(--ink-2);font-size:15px;margin-top:5px;text-align:left}
-.site-h .sub{color:var(--ink-3);font-size:12.5px;margin-top:4px}
+.site-h h2{margin:0;font:600 21px/1.15 var(--display);letter-spacing:-.01em}
+.site-h .fa{display:block;color:var(--ink-2);font-size:15px;margin-top:4px;text-align:left}
+.site-h .sub{color:var(--ink-3);font-size:12.5px;margin-top:3px}
 .badge{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;border-left:3px solid;font-weight:600;font-size:13px;white-space:nowrap;background:var(--bg)}
-.headline{margin:0;color:var(--ink);font-size:14.5px;max-width:64ch}
-.headline .m{font-family:var(--mono);font-size:13.5px}
+.headline{margin:0;font-size:14px;color:var(--ink)}
+.headline .m{font-family:var(--mono);font-size:13px}
+.dam{margin:0;font-size:12.5px;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start}
+.dam svg{flex:none;margin-top:2px}
 #chart,#probs,#models{display:block;width:100%;height:auto;overflow:visible}
-.clegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--ink-2);margin-bottom:-6px}
+.clegend{display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12px;color:var(--ink-2);margin-bottom:-6px}
 .clegend span{display:inline-flex;align-items:center;gap:6px}
 .sw{display:inline-block;flex:none}
-.sw.ln{width:14px;height:2px;border-radius:1px}
+.sw.ln{width:14px;height:2px}
 .sw.bd{width:14px;height:10px;background:linear-gradient(180deg,rgba(56,189,248,.2) 0 25%,rgba(56,189,248,.4) 25% 75%,rgba(56,189,248,.2) 75%)}
 .sw.bar{width:9px;height:11px;background:#38bdf8}
 .sw.wh{width:2px;height:12px;background:#7dd3fc;opacity:.7}
-.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.fact{padding:8px 10px;border-left:1px solid var(--line)}
-.fact:first-child{border-left:0;padding-left:0}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line)}
+.fact{padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+.fact:nth-child(even){padding-left:12px;border-left:1px solid var(--line)}
 .fact small{display:block;color:var(--ink-3);font-size:11.5px}
 .fact b{font-family:var(--mono);font-weight:500;font-size:14px}
 .fact i{font-style:normal;color:var(--ink-3);font-size:11px;margin-left:3px}
-
-/* impact */
-.impact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 22px;padding:12px 14px;background:rgba(4,13,20,.55);border-left:3px solid var(--imp,#6f8f9c)}
-.impact p{margin:0 0 6px;font-size:13.5px;color:var(--ink-2)}
+.impact{padding:12px 14px;background:rgba(4,13,20,.6);border-left:3px solid var(--imp,#6f8f9c);display:flex;flex-direction:column;gap:8px}
+.impact p{margin:0;font-size:13.5px;color:var(--ink-2)}
 .impact p b{color:var(--ink);font-weight:600}
-.impact .fa{font-size:14px;line-height:1.75;text-align:right}
-.impact .who{grid-column:1 / -1;display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.impact .fa{font-size:14px;line-height:1.8;text-align:right}
+.impact .who{display:flex;align-items:baseline;gap:10px}
 .impact .who b{font:600 20px/1 var(--mono);color:var(--ink)}
 .impact .who span{color:var(--ink-2);font-size:13px}
-.impact .sos{grid-column:1 / -1;font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:7px;margin-top:2px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.impact .sos{font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:7px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
-/* watch list */
-.list{grid-column:1 / -1}
+/* below the app */
+.below{max-width:1440px;margin:0 auto;padding:28px 22px 40px}
+.below h2{font:600 20px var(--display);margin:0 0 12px}
+.tbl-wrap{overflow-x:auto;border-top:1px solid var(--line)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{font-weight:500;font-size:12px;color:var(--ink-3)}
 td.num,th.num{text-align:right;font-family:var(--mono)}
 tbody tr{cursor:pointer}
 tbody tr:hover{background:rgba(45,212,191,.05)}
-tbody tr[aria-selected="true"]{background:rgba(56,189,248,.09)}
 td .fa{color:var(--ink-3);margin-left:8px;font-size:12px}
 .lvl{display:inline-flex;align-items:center;gap:6px}
-.tbl-wrap{overflow-x:auto;padding:6px 6px 8px}
 .pbar{display:inline-block;width:46px;height:6px;background:var(--grid);vertical-align:middle;margin-right:6px;position:relative;overflow:hidden}
 .pbar i{position:absolute;inset:0 auto 0 0}
-
-/* method */
-.method{grid-column:1 / -1;padding:6px 18px 14px}
-details summary{cursor:pointer;list-style:none;padding:12px 0;font:600 15px/1.2 var(--display);color:var(--ink)}
-details summary::-webkit-details-marker{display:none}
-details summary::before{content:'+';display:inline-block;width:18px;color:var(--teal)}
-details[open] summary::before{content:'–'}
-.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;color:var(--ink-2);font-size:13.5px}
-.cols h4{margin:0 0 6px;color:var(--ink);font:600 14px/1.3 var(--display)}
-.cols p{margin:0 0 8px}
-.cols code{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.about{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;color:var(--ink-2);font-size:13.5px}
+.about h3{margin:0 0 6px;color:var(--ink);font:600 15px/1.3 var(--display)}
+.about p{margin:0 0 8px}
 .mtab{width:100%;font-size:12.5px;margin:4px 0 8px}
 .mtab td{padding:4px 6px;white-space:normal}
-footer{color:var(--ink-3);font-size:12px;margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+footer{color:var(--ink-3);font-size:12px;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
 
 /* tooltip */
 .tip{position:fixed;pointer-events:none;z-index:9;background:rgba(4,13,20,.97);border:1px solid var(--line-2);padding:8px 10px;font-size:12.5px;color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.45);opacity:0;transition:opacity .12s;max-width:300px}
@@ -141,7 +164,8 @@ footer{color:var(--ink-3);font-size:12px;margin-top:18px;display:flex;flex-wrap:
 .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-out infinite}
 @keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.2);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.25}}
-.lbl{font:500 11px var(--sans);fill:var(--ink);paint-order:stroke;stroke:#061620;stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
+.lbl{font:500 11.5px var(--sans);fill:var(--ink);paint-order:stroke;stroke:#061620;stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
+.plbl{font:400 10.5px var(--sans);fill:#4d7584;pointer-events:none}
 .sea{font:italic 400 12px var(--sans);fill:#3f6b7d;letter-spacing:.06em;pointer-events:none}
 .ax text{fill:var(--ink-3);font:11px var(--mono)}
 .ax line,.ax path{stroke:var(--axis)}
@@ -149,90 +173,97 @@ footer{color:var(--ink-3);font-size:12px;margin-top:18px;display:flex;flex-wrap:
 .thr-l{font:11px var(--mono);fill:var(--ink-2)}
 .cap{font:11px var(--sans);fill:var(--ink-3)}
 .mname{font:11px var(--sans);fill:var(--ink-2)}
+.nss{vector-effect:non-scaling-stroke}
 
-@media (max-width:1020px){.grid{grid-template-columns:1fr}.cols{grid-template-columns:1fr}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.fact:nth-child(3){border-left:0;padding-left:0}}
-@media (max-width:560px){.wrap{padding:16px 12px 30px}.counters{width:100%}.counter{border-right:0;margin-right:0;padding-right:0;flex:1 1 100%;margin-bottom:8px}.counter .row{justify-content:space-between;gap:6px}.impact{grid-template-columns:1fr}}
+@media (max-width:1100px){:root{--side:430px}.status{display:none}}
+@media (max-width:860px){
+  .app{height:auto;min-height:0}
+  .bar{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}.search{order:3;max-width:none;flex-basis:100%}.navlink{margin-left:auto}
+  .stage{display:block}.mapwrap{height:auto;overflow:visible}#map{height:auto;aspect-ratio:900/760}
+  .legend{position:static;margin:8px 12px 0;max-width:none}.play{position:static;margin:8px 12px 12px}
+  .nowarn{top:10px;padding:6px 12px;white-space:nowrap}.nowarn b{display:inline;font-size:14px}.nowarn #nowarn-t{display:none}.nowarn .fa{display:inline;margin-left:8px;font-size:13px}
+  .panel{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .about{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div>
-      <div class="brand">
-        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
-          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs>
-          <rect x="1" y="1" width="42" height="42" rx="13" fill="#0a1b26" stroke="rgba(255,255,255,.12)"/>
-          <path d="M22 8c5 6.5 8.5 11.2 8.5 15.3a8.5 8.5 0 0 1-17 0C13.5 19.2 17 14.5 22 8z" fill="url(#lg)" opacity=".95"/>
-          <path d="M9 31c3.2 0 3.2 2.4 6.5 2.4s3.3-2.4 6.5-2.4 3.3 2.4 6.5 2.4S31.8 31 35 31" fill="none" stroke="#e4f0f4" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div>
-          <h1>Iran Flood Watch</h1>
-          <span class="fa" lang="fa">پایش و هشدار سیل ایران</span>
-        </div>
-      </div>
-      <div class="issued" id="issued"></div>
-    </div>
-    <div class="counters" id="counters"></div>
+<div class="app">
+  <header class="bar">
+    <a class="brand" href="#" id="home" aria-label="Iran Flood Watch, all warnings">
+      <svg width="36" height="36" viewBox="0 0 44 44" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs>
+        <rect x="1" y="1" width="42" height="42" rx="10" fill="#0a1b26" stroke="rgba(255,255,255,.12)"/>
+        <path d="M22 8c5 6.5 8.5 11.2 8.5 15.3a8.5 8.5 0 0 1-17 0C13.5 19.2 17 14.5 22 8z" fill="url(#lg)"/>
+        <path d="M9 31c3.2 0 3.2 2.4 6.5 2.4s3.3-2.4 6.5-2.4 3.3 2.4 6.5 2.4S31.8 31 35 31" fill="none" stroke="#e4f0f4" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span><h1>Iran Flood Watch</h1><span class="fa" lang="fa">پایش و هشدار سیل ایران</span></span>
+    </a>
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#6d8a97" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="#6d8a97" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="q" list="sitelist" placeholder="Search a city or river · جستجوی شهر یا رودخانه" aria-label="Search a city or river" autocomplete="off">
+      <datalist id="sitelist"></datalist>
+    </label>
+    <div class="status" id="status"></div>
+    <a class="navlink" href="#about">How it works</a>
   </header>
-
   <div class="stale" id="stale" role="alert"></div>
-  <main class="grid">
-    <section class="card" aria-label="Map of forecast sites">
-      <div class="card-h">
-        <h2>Forecast sites</h2>
-        <div class="seg" role="group" aria-label="Layers">
-          <button type="button" data-layer="river" aria-pressed="true">River flood</button>
-          <button type="button" data-layer="rain" aria-pressed="true">Flash-flood rain</button>
+  <nav class="days" id="days" role="tablist" aria-label="Warning day"></nav>
+  <main class="stage">
+    <section class="mapwrap" aria-label="Map of warnings">
+      <svg id="map" role="img" aria-label="Map of Iran with forecast sites and provinces coloured by warning level"></svg>
+      <div class="ctl">
+        <div class="grp" role="group" aria-label="Layers">
+          <button type="button" data-layer="river" aria-pressed="true" title="River floods">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8c3 0 3 2 6 2s3-2 6-2 3 2 6 2M3 14c3 0 3 2 6 2s3-2 6-2 3 2 6 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" data-layer="rain" aria-pressed="true" title="Flash-flood rain">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15a4 4 0 0 1 .5-8A5.5 5.5 0 0 1 18 9a3 3 0 0 1 0 6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="grp" role="group" aria-label="Zoom">
+          <button type="button" id="zin" title="Zoom in"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <button type="button" id="zout" title="Zoom out"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <button type="button" id="zfit" title="Whole country"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
-      <svg id="map" viewBox="0 0 900 760" role="img" aria-label="Map of Iran with forecast sites coloured by warning level"></svg>
+      <div class="nowarn" id="nowarn"><b>No warnings</b><span id="nowarn-t"></span><span class="fa" lang="fa">بدون هشدار</span></div>
       <div class="legend" id="legend"></div>
+      <button type="button" class="play" id="play" aria-pressed="false"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor"/></svg><span>Play the days</span></button>
     </section>
-
-    <section class="card detail" id="detail" aria-live="polite"></section>
-
-    <section class="card list" aria-label="Watch list">
-      <div class="card-h">
-        <h2>Watch list</h2>
-        <div class="seg" role="group" aria-label="Rows shown">
-          <button type="button" data-rows="all" aria-pressed="true">All sites</button>
-          <button type="button" data-rows="alerts" aria-pressed="false">Alerts only</button>
-        </div>
-      </div>
-      <div class="tbl-wrap"><table id="table"></table></div>
-    </section>
-
-    <section class="card method">
-      <details>
-        <summary>How the warnings are made</summary>
-        <div class="cols">
-          <div>
-            <h4>River floods</h4>
-            <p>Every day the 51-member GloFAS <span id="gver">v4</span> ensemble forecasts river discharge 30 days ahead on a ~5 km river network. Each site sits on the modelled river nearest the town that carries a real share of the local flow.</p>
-            <p>Thresholds are the 2-, 5- and 20-year floods of the <em>same model's</em> own daily discharge (<span id="rspan"></span>), from a Gumbel fit (L-moments) to water-year (Oct–Sep) maxima. Comparing a model with its own climate removes its bias, which is how GloFAS itself issues flood signals, so flows are shown as multiples of the 2-year flood. When GloFAS v5 goes live, its thresholds are built automatically and the site switches over.</p>
-          </div>
-          <div>
-            <h4>Flash-flood rain: seven models, wet ground and snowmelt</h4>
-            <p>Cities with a flash-flood history are tracked through rainfall from seven global ensembles combined into one forecast, each model counting equally however many members it has:</p>
-            <table class="mtab" id="mtab"></table>
-            <p>Rain is summed over Iran local days and 3-day windows and compared with the 2-, 5- and 20-year 1-day and 3-day rainfall of ERA5 (<span id="pspan"></span>). A second check follows the LISFLOOD model behind GloFAS: rain plus degree-day snowmelt, times the share of ground wet enough to shed it (soil moisture from the ECMWF ensemble), against return levels of the same quantity from ERA5. It can raise a warning when the ground or the snow makes a storm worse; it never lowers one. Rain alerts count days 1–<span id="rh"></span>.</p>
-          </div>
-          <div>
-            <h4>Levels, people at risk and feeds</h4>
-            <p id="levelrules"></p>
-            <p>People at risk are residents within 5 km of a river site's town or 10 km of a city centre, from the JRC Global Human Settlement Layer (2025). Every alert lists them with what to do, in English and Persian.</p>
-            <p>Alerts are also published as <a href="cap/index.atom">CAP 1.2</a> messages (the international Common Alerting Protocol) and an <a href="feed.xml">RSS feed</a>. The page checks for new model runs four times an hour. Below large dams the real flow depends on release decisions; those sites are marked. <b>Not an official warning</b>: always follow the Iran Meteorological Organization and local crisis-management authorities.</p>
-          </div>
-        </div>
-      </details>
-    </section>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
   </main>
+</div>
+
+<section class="below">
+  <h2>All sites</h2>
+  <div class="tbl-wrap"><table id="table"></table></div>
+
+  <div class="about" id="about">
+    <div>
+      <h3>River floods</h3>
+      <p>Every day the 51-member GloFAS <span id="gver">v4</span> ensemble forecasts river discharge 30 days ahead on a ~5 km river network. Each site sits on the modelled river nearest the town that carries a real share of the local flow.</p>
+      <p>Thresholds are the 2-, 5- and 20-year floods of the <em>same model's</em> own daily discharge (<span id="rspan"></span>), from a Gumbel fit (L-moments) to water-year (Oct–Sep) maxima. Comparing a model with its own climate removes its bias, which is how GloFAS itself issues flood signals, so flows are shown as multiples of the 2-year flood. When GloFAS v5 goes live, its thresholds are built automatically and the site switches over.</p>
+    </div>
+    <div>
+      <h3>Flash-flood rain: seven models, wet ground and snowmelt</h3>
+      <p>Cities with a flash-flood history are tracked through rainfall from seven global ensembles combined into one forecast, each model counting equally however many members it has:</p>
+      <table class="mtab" id="mtab"></table>
+      <p>Rain is summed over Iran local days and 3-day windows and compared with the 2-, 5- and 20-year 1-day and 3-day rainfall of ERA5 (<span id="pspan"></span>). A second check follows the LISFLOOD model behind GloFAS: rain plus degree-day snowmelt, times the share of ground wet enough to shed it, against return levels of the same quantity from ERA5. It can raise a warning, never lower one, and lowers the rain needed by at most 30%. Rain alerts count days 1–<span id="rh"></span>.</p>
+    </div>
+    <div>
+      <h3>Levels, people at risk and feeds</h3>
+      <p id="levelrules"></p>
+      <p>People at risk are residents within 5 km of a river site's town or 10 km of a city centre (JRC Global Human Settlement Layer, 2025). Every alert lists them with what to do, in English and Persian.</p>
+      <p>Alerts are also published as <a href="cap/index.atom">CAP 1.2</a> messages (the international Common Alerting Protocol) and an <a href="feed.xml">RSS feed</a>. The page checks for new model runs four times an hour. Below large dams the real flow depends on release decisions; those sites are marked. <b>Not an official warning</b>: always follow the Iran Meteorological Organization and local crisis-management authorities.</p>
+    </div>
+  </div>
 
   <footer>
     <span>Data: GloFAS (Copernicus Emergency Management Service); ensembles from ECMWF (IFS, AIFS), Google DeepMind (WeatherNext 2), NOAA (GEFS), DWD (ICON-EPS), ECCC (GEPS) and the Met Office (MOGREPS-G), via <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0); ERA5 (Copernicus Climate Change Service); population © JRC GHSL; boundaries © Natural Earth.</span>
     <span>Feeds: <a href="feed.xml">RSS</a> · <a href="cap/index.atom">CAP alerts</a> · Replays: <a href="replay-2026-11.html">November 2026</a> · <a href="replay-2019.html">spring 2019</a> · © 2026 <a href="https://risarezaei.github.io/">Parisa Abbasalizadehrezaei</a>. All rights reserved.</span>
   </footer>
-</div>
+</section>
 <div class="tip" id="tip" role="tooltip"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -245,10 +276,10 @@ const S = JSON.parse(document.getElementById('snapshot').textContent);
 const T = JSON.parse(document.getElementById('topo').textContent);
 
 const LV = [
-  { name: 'Normal',   color: '#6f8f9c' },
-  { name: 'Moderate', color: '#fab219' },
-  { name: 'High',     color: '#ec835a' },
-  { name: 'Severe',   color: '#d03b3b' },
+  { name: 'Normal',   fa: 'عادی',  color: '#6f8f9c' },
+  { name: 'Moderate', fa: 'متوسط', color: '#f5c518' },
+  { name: 'High',     fa: 'زیاد',  color: '#f08a3e' },
+  { name: 'Severe',   fa: 'شدید',  color: '#e0393e' },
 ];
 const RP_LABEL = { rp2: '2-year', rp5: '5-year', rp20: '20-year' };
 const RP_LVL = { rp2: 1, rp5: 2, rp20: 3 };
@@ -266,13 +297,23 @@ const icon = (level, size = 14, hollow = false) =>
 const fmtNum = (v) => v == null ? '–' : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString('en-US') : (+v.toPrecision(3)).toLocaleString('en-US'));
 const pct = (p) => p == null ? '–' : `${Math.round(p * 100)}%`;
 const dayDate = (start, i) => { const d = new Date(start + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + i); return d; };
+const iso = (d) => d.toISOString().slice(0, 10);
+const daysBetween = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5);
 const fmtDay = (d) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 const fmtShort = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const tz = (S.config && S.config.timezone) || 'Asia/Tehran';
-const fmtTehran = (iso) => new Date(iso).toLocaleString('en-GB', { timeZone: tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-const fmtRun = (iso) => `${new Date(iso).toISOString().slice(8, 10)} ${new Date(iso).toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })} ${new Date(iso).toISOString().slice(11, 13)}z`;
+const fmtTehran = (s) => new Date(s).toLocaleString('en-GB', { timeZone: tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const fmtRun = (s) => `${new Date(s).toISOString().slice(8, 10)} ${new Date(s).toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })} ${new Date(s).toISOString().slice(11, 13)}z`;
 const fmtX = (v) => v == null ? '–' : v >= 10 ? `${Math.round(v)}×` : v >= 0.1 ? `${(+v.toPrecision(2))}×` : v > 0 ? '<0.1×' : '0×';
+const fmtPeople = (n) => n == null ? '–' : n >= 1e6 ? `${(n / 1e6).toFixed(1)} M` : fmtNum(n);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const MODELS = (S.config && S.config.rainModels) || [];
+const MODEL = Object.fromEntries(MODELS.map((m) => [m.key, m]));
+const used = (S.runs && S.runs.used) || [];
+const gl = (S.runs && S.runs.glofas) || {};
+const info = S.thresholdsInfo || {};
+const HZ = { river: S.config.riverAlertHorizon, rain: S.config.rainAlertHorizon };
 
 const sites = [
   ...S.river.map((s) => ({ ...s, kind: 'river', title: `${s.river} at ${s.place}`, faName: s.fa, unit: 'm³/s', lat: s.slat, lon: s.slon })),
@@ -280,47 +321,48 @@ const sites = [
 ].filter((s) => !s.error);
 const failed = [...S.river, ...S.rain].filter((s) => s.error);
 const byKey = new Map(sites.map((s) => [`${s.kind}:${s.id}`, s]));
-const state = { layers: { river: true, rain: true }, rows: 'all', sel: null };
+
+// ---------- days: "next 10 days" plus one tab per local day ----------
+const today = new Date(S.generated).toLocaleDateString('en-CA', { timeZone: tz });
+const NDAYS = 11;
+const DAYS = [{ key: 'all' }, ...Array.from({ length: NDAYS }, (_, i) => ({ key: iso(dayDate(today, i)), i }))];
+const state = { day: 'all', layers: { river: true, rain: true }, sel: null, t: d3.zoomIdentity, playing: null };
+
+const parts = (s) => (s.kind === 'rain' ? [s.fc, s.fc3, s.fcw, s.fcw3] : [s.fc]).filter(Boolean);
+const dayIndex = (s) => state.day === 'all' ? null : daysBetween(s.fcStart, state.day);
+function levelOn(s, day = state.day) {
+  if (day === 'all') return s.level || 0;
+  const d = daysBetween(s.fcStart, day);
+  if (d < 0 || d >= HZ[s.kind]) return 0;
+  return Math.max(0, ...parts(s).map((p) => p.lvl[d] ?? 0));
+}
+const shown = (s) => state.layers[s.kind];
+const dayLabel = (k) => k === 'all' ? `the next ${S.config.rainAlertHorizon} days (rivers ${S.config.riverAlertHorizon})` : fmtDay(new Date(k + 'T00:00:00Z'));
 
 // ---------- header ----------
-const MODELS = (S.config && S.config.rainModels) || [];
-const MODEL = Object.fromEntries(MODELS.map((m) => [m.key, m]));
-const used = (S.runs && S.runs.used) || [];
-const gl = (S.runs && S.runs.glofas) || {};
 const newest = used.length ? used.reduce((a, b) => (a.init > b.init ? a : b)) : null;
-document.getElementById('issued').innerHTML =
-  `Updated <b>${fmtTehran(S.generated)}</b> Tehran time` +
-  (gl.init ? `<br><span class="runs">River: GloFAS v${gl.version || 4} run <b>${fmtRun(gl.init)}</b> · Rain: ${used.length} ensembles` +
-    (newest ? `, newest ${esc((MODEL[newest.key] || {}).name || newest.key)} <b>${fmtRun(newest.init)}</b>` : '') + `</span>` : '') +
-  (failed.length ? ` · <span style="color:var(--l1)">no data for ${failed.length} site${failed.length > 1 ? 's' : ''}</span>` : '');
-// Never let an old forecast look current
+document.getElementById('status').innerHTML =
+  `<span class="dot"></span>Updated <b>${fmtTehran(S.generated)}</b> Tehran<br>` +
+  (gl.init ? `GloFAS v${gl.version || 4} <b>${fmtRun(gl.init)}</b> · ${used.length} rain models` + (newest ? `, newest <b>${fmtRun(newest.init)}</b>` : '') : '') +
+  (failed.length ? ` · <span style="color:var(--l1)">no data for ${failed.length}</span>` : '');
 {
   const notes = [];
   if (gl.init && (Date.now() - Date.parse(gl.init)) / 3.6e6 > (S.config.staleHours || {}).glofas) notes.push(`the river forecast (GloFAS) is from a run ${Math.round((Date.now() - Date.parse(gl.init)) / 3.6e6)} hours ago`);
   const fresh = used.filter((u) => (Date.now() - Date.parse(u.init)) / 3.6e6 <= ((MODEL[u.key] || {}).staleHours || 30) + 12);
   if (MODELS.length && fresh.length < 4) notes.push(`only ${fresh.length} of ${MODELS.length} rain models have a recent run`);
   if (Date.now() - Date.parse(S.generated) > 18 * 3.6e6) notes.push(`this page was last updated ${Math.round((Date.now() - Date.parse(S.generated)) / 3.6e6)} hours ago`);
-  if (notes.length) {
-    const el = document.getElementById('stale');
-    el.innerHTML = `<b>Out of date.</b> ${notes.join('; ')}. Do not rely on this page until it updates.`;
-    el.style.display = 'block';
-  }
+  if (notes.length) { const el = document.getElementById('stale'); el.innerHTML = `<b>Out of date.</b> ${notes.join('; ')}. Do not rely on this page until it updates.`; el.style.display = 'block'; }
 }
-const counterHtml = (label, arr) => `<div class="counter"><h3>${label}</h3><div class="row">` +
-  [3, 2, 1, 0].map((l) => `<div class="cnt ${arr[l] ? '' : 'zero'}" title="${LV[l].name}">${icon(l, 16)}<div>${arr[l]}<small>${LV[l].name}</small></div></div>`).join('') + '</div></div>';
-document.getElementById('counters').innerHTML =
-  counterHtml(`River sites · ${S.river.length}`, S.summary.river) + counterHtml(`Rain sites · ${S.rain.length}`, S.summary.rain);
 
-// method text
-const info = S.thresholdsInfo || {};
+// ---------- about ----------
 document.getElementById('rspan').textContent = (gl.version === 5 && info.riverPeriodV5) || info.riverPeriod || '1997';
+document.getElementById('pspan').textContent = info.rainPeriod || '1992';
+document.getElementById('rh').textContent = S.config.rainAlertHorizon;
 document.getElementById('gver').textContent = `v${gl.version || 4}`;
 document.getElementById('mtab').innerHTML = MODELS.map((m) => {
   const u = used.find((x) => x.key === m.key);
-  return `<tr><td>${esc(m.name)}${m.ai ? ' <span style="color:var(--teal)">AI</span>' : ''}</td><td style="color:var(--ink-3)">${esc(m.org)}</td><td class="num" style="font-family:var(--mono)">${u ? fmtRun(u.init) : '<span style="color:var(--l1)">not used</span>'}</td></tr>`;
+  return `<tr><td>${esc(m.name)}${m.ai ? ' <span style="color:var(--teal)">AI</span>' : ''}</td><td style="color:var(--ink-3)">${esc(m.org)}</td><td style="font-family:var(--mono);text-align:right">${u ? fmtRun(u.init) : '<span style="color:var(--l1)">not used</span>'}</td></tr>`;
 }).join('');
-document.getElementById('pspan').textContent = info.rainPeriod || '1992';
-document.getElementById('rh').textContent = S.config.rainAlertHorizon;
 document.getElementById('levelrules').innerHTML = S.config.levels.map((L) =>
   `${icon(L.level)} <b>${L.label}</b>: on any day, at least ${Math.round(L.minProb * 100)}% of ensemble members (model-weighted for rain) above the ${RP_LABEL[L.rp]} level.`).join('<br>') +
   `<br>${icon(0)} <b>Normal</b>: none of these.`;
@@ -338,97 +380,192 @@ function showTip(html, ev) {
 const hideTip = () => { tip.style.opacity = 0; };
 const row = (k, v) => `<div class="r"><span>${k}</span><b>${v}</b></div>`;
 
+// ---------- day strip ----------
+const daysEl = document.getElementById('days');
+function renderDays() {
+  daysEl.innerHTML = DAYS.map((d) => {
+    const lv = sites.filter(shown).map((s) => levelOn(s, d.key));
+    const max = Math.max(0, ...lv), n = lv.filter((l) => l > 0).length;
+    const title = d.key === 'all' ? `Next ${S.config.rainAlertHorizon} days` : d.i === 0 ? `Today · ${fmtShort(new Date(d.key + 'T00:00:00Z'))}` : fmtDay(new Date(d.key + 'T00:00:00Z'));
+    const st = max ? `${icon(max, 10)} ${LV[max].name} · ${n} site${n > 1 ? 's' : ''}` : 'No warnings';
+    return `<button class="day${d.key === 'all' ? ' first' : ''}" role="tab" data-day="${d.key}" aria-selected="${state.day === d.key}" style="border-top-color:${max ? LV[max].color : 'transparent'}"><span class="d">${title}</span><span class="s">${st}</span></button>`;
+  }).join('');
+  daysEl.querySelectorAll('.day').forEach((b) => b.addEventListener('click', () => { stopPlay(); setDay(b.dataset.day); }));
+}
+function setDay(k) {
+  state.day = k;
+  daysEl.querySelectorAll('.day').forEach((b) => b.setAttribute('aria-selected', b.dataset.day === k));
+  const el = daysEl.querySelector(`[data-day="${k}"]`); if (el) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  drawMap(); renderPanel();
+}
+
 // ---------- map ----------
-const map = d3.select('#map');
+const svg = d3.select('#map');
 const W = 900, H = 760;
+svg.attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'xMidYMid meet');
 const land = topojson.feature(T, T.objects.land);
 const iran = { type: 'FeatureCollection', features: land.features.filter((f) => f.properties.ADM0_A3 === 'IRN') };
-const proj = d3.geoConicConformal().parallels([28, 38]).rotate([-53.5, 0]).fitExtent([[24, 18], [W - 24, H - 18]], iran);
+const provs = topojson.feature(T, T.objects.prov).features;
+const proj = d3.geoConicConformal().parallels([28, 38]).rotate([-53.5, 0]).fitExtent([[30, 24], [W - 30, H - 24]], iran);
 const path = d3.geoPath(proj);
-const defs = map.append('defs');
+const defs = svg.append('defs');
 const landGrad = defs.append('radialGradient').attr('id', 'landg').attr('cx', '45%').attr('cy', '40%').attr('r', '75%');
 landGrad.append('stop').attr('offset', '0').attr('stop-color', '#123445');
 landGrad.append('stop').attr('offset', '1').attr('stop-color', '#0c2635');
-const glow = defs.append('filter').attr('id', 'glow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%');
-glow.append('feGaussianBlur').attr('stdDeviation', 6).attr('result', 'b');
-const fm = glow.append('feMerge'); fm.append('feMergeNode').attr('in', 'b'); fm.append('feMergeNode').attr('in', 'SourceGraphic');
-
-map.append('rect').attr('width', W).attr('height', H).attr('fill', '#06141e');
-map.append('path').datum(d3.geoGraticule().step([5, 5])()).attr('d', path).attr('fill', 'none').attr('stroke', '#0d2532').attr('stroke-width', 0.6);
-map.append('g').selectAll('path').data(land.features.filter((f) => f.properties.ADM0_A3 !== 'IRN')).join('path')
-  .attr('d', path).attr('fill', '#0a1d29').attr('stroke', '#12303f').attr('stroke-width', 0.7);
-map.append('path').datum(iran).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(45,212,191,.35)').attr('stroke-width', 6).attr('filter', 'url(#glow)');
-map.append('path').datum(iran).attr('d', path).attr('fill', 'url(#landg)');
-map.append('g').selectAll('path').data(topojson.feature(T, T.objects.prov).features).join('path')
-  .attr('d', path).attr('fill', 'none').attr('stroke', '#1f4a5c').attr('stroke-width', 0.6);
-map.append('g').selectAll('path').data(topojson.feature(T, T.objects.lakes).features).join('path')
-  .attr('d', path).attr('fill', '#06141e').attr('stroke', '#1b4252').attr('stroke-width', 0.6);
-map.append('path').datum(iran).attr('d', path).attr('fill', 'none').attr('stroke', '#2dd4bf').attr('stroke-opacity', 0.75).attr('stroke-width', 1.1);
+svg.append('rect').attr('width', W).attr('height', H).attr('fill', '#06141e');
+const gGeo = svg.append('g');
+gGeo.append('path').datum(d3.geoGraticule().step([5, 5])()).attr('d', path).attr('class', 'nss').attr('fill', 'none').attr('stroke', '#0d2532').attr('stroke-width', 0.6);
+gGeo.append('g').selectAll('path').data(land.features.filter((f) => f.properties.ADM0_A3 !== 'IRN')).join('path')
+  .attr('d', path).attr('class', 'nss').attr('fill', '#0a1d29').attr('stroke', '#12303f').attr('stroke-width', 0.7);
+gGeo.append('path').datum(iran).attr('d', path).attr('fill', 'url(#landg)');
+const gProv = gGeo.append('g');
+const provPaths = gProv.selectAll('path').data(provs).join('path').attr('d', path).attr('class', 'nss').attr('stroke', '#1f4a5c').attr('stroke-width', 0.7);
+if (T.objects.rivers) gGeo.append('g').selectAll('path').data(topojson.feature(T, T.objects.rivers).features).join('path')
+  .attr('d', path).attr('class', 'nss').attr('fill', 'none').attr('stroke', '#2a6f86').attr('stroke-width', 1).attr('stroke-opacity', 0.75).style('pointer-events', 'none');
+gGeo.append('g').selectAll('path').data(topojson.feature(T, T.objects.lakes).features).join('path')
+  .attr('d', path).attr('class', 'nss').attr('fill', '#06141e').attr('stroke', '#1b4252').attr('stroke-width', 0.6).style('pointer-events', 'none');
+gGeo.append('path').datum(iran).attr('d', path).attr('class', 'nss').attr('fill', 'none').attr('stroke', '#2dd4bf').attr('stroke-opacity', 0.8).attr('stroke-width', 1.2).style('pointer-events', 'none');
 [['Caspian Sea', 51.4, 38.1], ['Persian Gulf', 51.0, 27.4], ['Gulf of Oman', 58.9, 24.9]].forEach(([n, lo, la]) => {
   const [x, y] = proj([lo, la]);
-  map.append('text').attr('class', 'sea').attr('x', x).attr('y', y).attr('text-anchor', 'middle').text(n);
+  gGeo.append('text').attr('class', 'sea').attr('x', x).attr('y', y).attr('text-anchor', 'middle').text(n);
 });
+// which province each site lies in (for province shading)
+sites.forEach((s) => { s.provIdx = provs.findIndex((f) => d3.geoContains(f, [s.lon, s.lat])); });
 
-const gSites = map.append('g');
-const ruler = map.append('text').attr('class', 'lbl').attr('opacity', 0);
+const gLabels = svg.append('g');
+const gSites = svg.append('g');
+const ruler = svg.append('text').attr('class', 'lbl').attr('opacity', 0);
 const measure = (t) => { ruler.text(t); return ruler.node().getComputedTextLength() || t.length * 6; };
-const radius = (s) => [5, 6.5, 8, 9.5][s.level];
+const radius = (l) => [5, 6.5, 8, 9.5][l];
+const pos = (s) => state.t.apply(proj([s.lon, s.lat]));
+
+function drawProvinces() {
+  const lv = provs.map(() => 0);
+  sites.filter(shown).forEach((s) => { if (s.provIdx >= 0) lv[s.provIdx] = Math.max(lv[s.provIdx], levelOn(s)); });
+  provPaths.attr('fill', (_, i) => lv[i] ? LV[lv[i]].color : 'transparent').attr('fill-opacity', (_, i) => lv[i] ? 0.2 : 0)
+    .on('mousemove', (ev, f) => { const i = provs.indexOf(f); showTip(`<div class="t">${esc(f.properties.name)} <span class="fa">${esc((f.properties.name_fa || '').replace('استان ', ''))}</span></div>` + row('Highest level', LV[lv[i]].name), ev); })
+    .on('mouseleave', hideTip);
+  // province names once zoomed in
+  const k = state.t.k;
+  gLabels.selectAll('text.plbl').data(k >= 2.2 ? provs : []).join('text').attr('class', 'plbl').attr('text-anchor', 'middle')
+    .attr('x', (f) => state.t.apply(path.centroid(f))[0]).attr('y', (f) => state.t.apply(path.centroid(f))[1]).text((f) => f.properties.name);
+}
+
 function drawSites() {
-  const vis = sites.filter((s) => state.layers[s.kind]).sort((a, b) => a.level - b.level);
-  const g = gSites.selectAll('g.site').data(vis, (s) => `${s.kind}:${s.id}`).join((enter) => {
+  const vis = sites.filter(shown).map((s) => ({ s, l: levelOn(s) })).sort((a, b) => a.l - b.l);
+  const g = gSites.selectAll('g.site').data(vis, (d) => `${d.s.kind}:${d.s.id}`).join((enter) => {
     const e = enter.append('g').attr('class', 'site').attr('tabindex', 0).attr('role', 'button');
     e.append('path').attr('class', 'halo');
     e.append('path').attr('class', 'mk');
     return e;
   });
-  g.attr('transform', (s) => `translate(${proj([s.lon, s.lat])})`)
-    .attr('aria-label', (s) => `${s.title}: ${LV[s.level].name}`);
-  g.select('.halo').attr('d', (s) => shapePath(s.level, radius(s)))
-    .attr('fill', (s) => LV[s.level].color).attr('class', (s) => 'halo' + (s.level >= 2 ? ' pulse' : ''))
-    .attr('opacity', (s) => s.level >= 2 ? 0.5 : 0);
-  g.select('.mk').attr('d', (s) => shapePath(s.level, radius(s)))
-    .attr('fill', (s) => s.kind === 'river' ? LV[s.level].color : '#06141e')
-    .attr('stroke', (s) => s.kind === 'river' ? '#06141e' : LV[s.level].color)
-    .attr('stroke-width', (s) => s.kind === 'river' ? 2 : 2.4)
-    .attr('opacity', (s) => s.level === 0 ? 0.85 : 1);
-  g.on('click', (ev, s) => select(s))
-    .on('keydown', (ev, s) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(s); } })
-    .on('mousemove', (ev, s) => showTip(`<div class="t">${esc(s.title)}</div>` +
-      row(s.kind === 'river' ? 'River flood' : 'Flash-flood rain', `${LV[s.level].name}`) +
-      row('Max P(> 2-year)', pct(s.maxProb.rp2)) + row('Max P(> 5-year)', pct(s.maxProb.rp5)) +
-      (s.pop ? row(`People within ${s.pop.r} km`, fmtNum(s.pop.n)) : '') + row('Province', esc(s.prov)), ev))
+  g.order();
+  g.attr('transform', (d) => `translate(${pos(d.s)})`).attr('aria-label', (d) => `${d.s.title}: ${LV[d.l].name}`);
+  g.select('.halo').attr('d', (d) => shapePath(d.l, radius(d.l))).attr('fill', (d) => LV[d.l].color)
+    .attr('class', (d) => 'halo' + (d.l >= 2 ? ' pulse' : '')).attr('opacity', (d) => (d.l >= 2 ? 0.5 : 0));
+  g.select('.mk').attr('d', (d) => shapePath(d.l, radius(d.l)))
+    .attr('fill', (d) => (d.s.kind === 'river' ? LV[d.l].color : '#06141e'))
+    .attr('stroke', (d) => (d.s.kind === 'river' ? '#06141e' : LV[d.l].color))
+    .attr('stroke-width', (d) => (d.s.kind === 'river' ? 2 : 2.4)).attr('opacity', (d) => (d.l === 0 ? 0.85 : 1));
+  g.on('click', (ev, d) => select(d.s))
+    .on('keydown', (ev, d) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(d.s); } })
+    .on('mousemove', (ev, d) => showTip(`<div class="t">${esc(d.s.title)}</div>` +
+      row(d.s.kind === 'river' ? 'River flood' : 'Flash-flood rain', LV[d.l].name) +
+      row('Max P(> 2-year)', pct(d.s.maxProb.rp2)) + (d.s.pop ? row(`People within ${d.s.pop.r} km`, fmtNum(d.s.pop.n)) : '') + row('Province', esc(d.s.prov)), ev))
     .on('mouseleave', hideTip);
-  // labels: alerts and the selected site, placed greedily so none collide
-  const labelled = vis.filter((s) => s.level > 0 || s === state.sel)
-    .sort((a, b) => (b === state.sel) - (a === state.sel) || b.level - a.level || b.score - a.score);
-  const boxes = vis.map((s) => { const [x, y] = proj([s.lon, s.lat]), r = radius(s) + 1; return [x - r, y - r, x + r, y + r]; });
-  const hit = (b) => b[0] < 4 || b[2] > W - 4 || b[1] < 4 || b[3] > H - 4 ||
-    boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+  // labels: warnings, the selected site, and everything once zoomed in — placed so none collide
+  const labelled = vis.filter((d) => d.l > 0 || d.s === state.sel || state.t.k >= 2.2)
+    .sort((a, b) => (b.s === state.sel) - (a.s === state.sel) || b.l - a.l || b.s.score - a.s.score);
+  const boxes = vis.map((d) => { const [x, y] = pos(d.s), r = radius(d.l) + 1; return [x - r, y - r, x + r, y + r]; });
+  const hit = (b) => b[0] < 4 || b[2] > W - 4 || b[1] < 4 || b[3] > H - 4 || boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
   const placed = [];
-  labelled.forEach((s) => {
-    const text = s.kind === 'river' ? `${s.river} · ${s.place}` : s.name;
-    const w = measure(text), h = 13, [x, y] = proj([s.lon, s.lat]), r = radius(s) + 5;
+  labelled.forEach((d) => {
+    const text = d.s.kind === 'river' ? `${d.s.river} · ${d.s.place}` : d.s.name;
+    const w = measure(text), h = 13, [x, y] = pos(d.s), r = radius(d.l) + 5;
     const opts = [[x + r, y + 4, 'start'], [x - r, y + 4, 'end'], [x, y - r - 2, 'middle'], [x, y + r + 11, 'middle']];
     const box = ([tx, ty, a]) => { const x0 = a === 'start' ? tx : a === 'end' ? tx - w : tx - w / 2; return [x0 - 2, ty - h + 3, x0 + w + 2, ty + 3]; };
     const own = boxes.findIndex((o) => Math.abs((o[0] + o[2]) / 2 - x) < 0.01 && Math.abs((o[1] + o[3]) / 2 - y) < 0.01);
-    const saved = own >= 0 ? boxes.splice(own, 1)[0] : null; // a label may not collide with its own marker test
+    const saved = own >= 0 ? boxes.splice(own, 1)[0] : null;
     let pick = opts.find((o) => !hit(box(o)));
-    if (!pick && s === state.sel) pick = opts[0];
+    if (!pick && d.s === state.sel) pick = opts[0];
     if (saved) boxes.push(saved);
-    if (pick) { boxes.push(box(pick)); placed.push({ s, text, x: pick[0], y: pick[1], a: pick[2] }); }
+    if (pick) { boxes.push(box(pick)); placed.push({ s: d.s, text, x: pick[0], y: pick[1], a: pick[2] }); }
   });
   gSites.selectAll('text.lbl').data(placed, (d) => `${d.s.kind}:${d.s.id}`).join('text').attr('class', 'lbl')
     .attr('x', (d) => d.x).attr('y', (d) => d.y).attr('text-anchor', (d) => d.a).text((d) => d.text);
-  gSites.selectAll('circle.selring').data(state.sel && state.layers[state.sel.kind] ? [state.sel] : []).join('circle')
+  gSites.selectAll('circle.selring').data(state.sel && shown(state.sel) ? [state.sel] : []).join('circle')
     .attr('class', 'selring').attr('fill', 'none').attr('stroke', '#e4f0f4').attr('stroke-width', 1.5).attr('stroke-dasharray', '3 3')
-    .attr('r', (s) => radius(s) + 7).attr('cx', (s) => proj([s.lon, s.lat])[0]).attr('cy', (s) => proj([s.lon, s.lat])[1]);
+    .attr('r', (s) => radius(levelOn(s)) + 7).attr('cx', (s) => pos(s)[0]).attr('cy', (s) => pos(s)[1]);
+}
+
+function drawMap() {
+  drawProvinces(); drawSites();
+  const any = sites.filter(shown).some((s) => levelOn(s) > 0);
+  document.getElementById('nowarn').style.opacity = any ? 0 : 1;
+  document.getElementById('nowarn-t').textContent = `for ${dayLabel(state.day)}`;
+}
+
+const zoom = d3.zoom().scaleExtent([1, 8]).translateExtent([[0, 0], [W, H]])
+  .on('zoom', (ev) => { state.t = ev.transform; gGeo.attr('transform', ev.transform); drawProvinces(); drawSites(); });
+svg.call(zoom).on('dblclick.zoom', null);
+document.getElementById('zin').addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy, 1.6));
+document.getElementById('zout').addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.6));
+document.getElementById('zfit').addEventListener('click', () => svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
+function zoomTo(s) {
+  const [x, y] = proj([s.lon, s.lat]), k = Math.max(state.t.k, 2.6);
+  svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity.translate(W / 2 - x * k, H / 2 - y * k).scale(k));
 }
 document.getElementById('legend').innerHTML =
-  [0, 1, 2, 3].map((l) => `<span>${icon(l)}${LV[l].name}</span>`).join('') +
-  `<span style="margin-left:auto">${icon(0, 14)} filled = river point</span><span>${icon(0, 14, true)} outlined = rain point</span>`;
+  [3, 2, 1, 0].map((l) => `<span>${icon(l)}${LV[l].name}</span>`).join('') +
+  `<span style="color:var(--ink-3)">${icon(0, 13)} river</span><span style="color:var(--ink-3)">${icon(0, 13, true)} rain</span>`;
+document.querySelectorAll('[data-layer]').forEach((b) => b.addEventListener('click', () => {
+  const k = b.dataset.layer; state.layers[k] = !state.layers[k]; b.setAttribute('aria-pressed', state.layers[k]); renderDays(); drawMap(); renderPanel(); renderTable();
+}));
 
-// ---------- detail ----------
-const detail = document.getElementById('detail');
+// play: step through the days like a forecast animation
+const playBtn = document.getElementById('play');
+function stopPlay() { if (state.playing) { clearInterval(state.playing); state.playing = null; playBtn.setAttribute('aria-pressed', 'false'); playBtn.querySelector('span').textContent = 'Play the days'; } }
+playBtn.addEventListener('click', () => {
+  if (state.playing) return stopPlay();
+  let i = 0;
+  playBtn.setAttribute('aria-pressed', 'true'); playBtn.querySelector('span').textContent = 'Pause';
+  setDay(DAYS[1].key);
+  state.playing = setInterval(() => { i++; if (i >= NDAYS) { stopPlay(); return; } setDay(DAYS[1 + i].key); }, 1200);
+});
+
+// ---------- side panel ----------
+const panel = document.getElementById('panel');
+function renderPanel() { if (state.sel) renderDetail(state.sel); else renderList(); }
+
+function renderList() {
+  const list = sites.filter(shown).map((s) => ({ s, l: levelOn(s) })).filter((d) => d.l > 0)
+    .sort((a, b) => b.l - a.l || b.s.score - a.s.score);
+  const head = `<div class="ph"><h2>Warnings · ${state.day === 'all' ? `next ${S.config.rainAlertHorizon} days` : fmtDay(new Date(state.day + 'T00:00:00Z'))}</h2>` +
+    `<div class="sub">${sites.filter(shown).length} sites watched · rivers ${state.layers.river ? 'on' : 'off'}, flash-flood rain ${state.layers.rain ? 'on' : 'off'}</div></div>`;
+  if (!list.length) {
+    const near = sites.filter(shown).sort((a, b) => b.maxProb.rp2 - a.maxProb.rp2).slice(0, 3);
+    panel.innerHTML = head + `<div class="empty"><b>No warnings</b>No site is forecast to reach its 2-year level ${state.day === 'all' ? 'in this period' : 'on this day'}.` +
+      `<div class="fa" lang="fa" style="margin-top:6px">هیچ هشداری برای این بازه نیست.</div></div>` +
+      `<div class="grouph">Closest to a warning</div>` + near.map(rowHtml).join('') +
+      `<div class="quiet">Select any site on the map, or search above, to see its forecast.</div>`;
+  } else {
+    panel.innerHTML = head + [3, 2, 1].map((l) => {
+      const g = list.filter((d) => d.l === l);
+      return g.length ? `<div class="grouph">${icon(l, 13)} ${LV[l].name} <span class="fa" lang="fa">${LV[l].fa}</span> · ${g.length}</div>` + g.map((d) => rowHtml(d.s)).join('') : '';
+    }).join('') + `<div class="quiet">Select a warning for the forecast, people at risk and what to do.</div>`;
+  }
+  panel.querySelectorAll('.wrow').forEach((b) => b.addEventListener('click', () => select(byKey.get(b.dataset.key), { zoomIn: true })));
+  panel.scrollTop = 0;
+}
+function rowHtml(s) {
+  const l = levelOn(s);
+  const from = s.firstAlertDay != null && s.level ? `from ${fmtShort(dayDate(s.fcStart, s.firstAlertDay))}` : `max P(>2-yr) ${pct(s.maxProb.rp2)}`;
+  return `<button class="wrow" data-key="${s.kind}:${s.id}" style="border-left-color:${LV[l].color}">
+    <span class="n">${esc(s.title)}<span class="fa" lang="fa">${esc(s.faName)}</span></span>
+    <span class="m">${s.kind === 'river' ? 'River flood' : 'Flash flood'} · ${esc(s.prov)} · ${from}${s.boosted ? ' · wet ground' : ''}</span>
+    <span class="p">${fmtPeople(s.pop && s.pop.n)}<small>people</small></span></button>`;
+}
+
 const TRIG = {
   '1-day rain': ['fc', (rp) => `the ${rp} daily rainfall`],
   '3-day rain': ['fc3', (rp) => `the ${rp} 3-day rainfall (3 days ending)`],
@@ -450,8 +587,7 @@ function headline(s) {
     if (s.boosted) t += ` Wet ground or snowmelt raised the level above what the rain alone gives (${LV[s.levelRainOnly].name}).`;
     return t;
   }
-  const hz = s.kind === 'river' ? S.config.riverAlertHorizon : S.config.rainAlertHorizon;
-  let t = `<b>No ${s.kind === 'river' ? 'flood' : 'heavy-rain'} signal</b> in the next ${hz} days. Highest chance of passing the 2-year ${s.kind === 'river' ? 'flow' : 'level (rain alone or on wet ground)'}: <span class="m">${pct(s.maxProb.rp2)}</span>.`;
+  let t = `<b>No ${s.kind === 'river' ? 'flood' : 'heavy-rain'} signal</b> in the next ${HZ[s.kind]} days. Highest chance of passing the 2-year ${s.kind === 'river' ? 'flow' : 'level (rain alone or on wet ground)'}: <span class="m">${pct(s.maxProb.rp2)}</span>.`;
   if (s.kind === 'river' && s.qNow != null) t += ` Flow today: <span class="m">${fmtX(s.nowRatio)}</span> the 2-year flood.`;
   return t;
 }
@@ -459,11 +595,11 @@ function impactBox(s) {
   const im = s.impact;
   if (!im || (!im.exposure && !im.headline)) return '';
   const c = LV[s.level || 0].color;
-  const who = im.people != null ? `<div class="who"><b>${im.people >= 1e6 ? (im.people / 1e6).toFixed(1) + ' M' : fmtNum(im.people)}</b><span>people within ${im.radiusKm} km ${s.kind === 'river' ? 'of this reach' : 'of the city centre'}</span></div>` : '';
+  const who = im.people != null ? `<div class="who"><b>${fmtPeople(im.people)}</b><span>people within ${im.radiusKm} km ${s.kind === 'river' ? 'of this reach' : 'of the city centre'}</span></div>` : '';
   if (!s.level) return `<div class="impact" style="--imp:${c}">${who}</div>`;
   return `<div class="impact" style="--imp:${c}">${who}
-    <div><p><b>What to do.</b> ${esc(im.advice.en)}</p></div>
-    <div><p class="fa" lang="fa"><b>چه باید کرد.</b> ${esc(im.advice.fa)}</p></div>
+    <p><b>What to do.</b> ${esc(im.advice.en)}</p>
+    <p class="fa" lang="fa"><b>چه باید کرد.</b> ${esc(im.advice.fa)}</p>
     <div class="sos"><span>${esc(im.emergency.en)}</span><span class="fa" lang="fa">${esc(im.emergency.fa)}</span></div></div>`;
 }
 function renderDetail(s) {
@@ -474,38 +610,45 @@ function renderDetail(s) {
   const recFact = rec ? `<div class="fact"><small>Largest ${s.kind === 'river' ? 'flow' : 'day'} since ${since}</small><b>${s.kind === 'river' ? fmtX(rec[1] / s.thr.rp2) : fmtNum(rec[1])}</b><i>${s.kind === 'river' ? '' : 'mm '}${fmtShort(new Date(rec[0] + 'T00:00:00Z'))} ${rec[0].slice(0, 4)}</i></div>` : '';
   const g = s.ground;
   const meltNext = g ? d3.sum(g.melt.slice(0, 3)) : 0;
-  const groundFact = g && g.wNow != null
-    ? fact('Ground wetness now', `${Math.round(g.wNow * 100)}%`, meltNext >= 1 ? `+${fmtNum(meltNext)} mm melt in 3 days` : 'of its wettest')
-    : fact('5-year day', s.thr.rp5, 'mm');
+  const groundFact = g && g.wNow != null ? fact('Ground wetness now', `${Math.round(g.wNow * 100)}%`, meltNext >= 1 ? `+${fmtNum(meltNext)} mm melt in 3 days` : 'of its wettest') : fact('5-year day', s.thr.rp5, 'mm');
   const facts = s.kind === 'river'
     ? fact('2-year flood (model)', s.thr.rp2, 'm³/s') + fact('5-year flood', fmtX(s.thr.rp5 / s.thr.rp2), 'of 2-yr') + fact('20-year flood', fmtX(s.thr.rp20 / s.thr.rp2), 'of 2-yr') + recFact
     : fact('2-year day', s.thr.rp2, 'mm') + (s.thr3 ? fact('2-year 3 days', s.thr3.rp2, 'mm') : fact('20-year day', s.thr.rp20, 'mm')) + groundFact + recFact;
-  const rainRows = s.kind === 'rain' ? 3 + (s.fc3 ? 3 : 0) + (s.fcw ? 3 : 0) : 3;
-  detail.innerHTML = `
-    <div class="site-h">
-      <div><h2>${esc(s.title)}</h2><span class="fa" lang="fa">${esc(s.faName)}</span><div class="sub">${typeTxt}</div></div>
-      <span class="badge" style="border-color:${LV[s.level].color}">${icon(s.level, 15)} ${LV[s.level].name}</span>
-    </div>
+  const rows = s.kind === 'rain' ? 3 + (s.fc3 ? 3 : 0) + (s.fcw ? 3 : 0) : 3;
+  const dl = levelOn(s);
+  const dayNote = state.day !== 'all' ? `<div class="sub">On ${fmtDay(new Date(state.day + 'T00:00:00Z'))}: <b style="color:${LV[dl].color}">${LV[dl].name}</b></div>` : '';
+  panel.innerHTML = `<div class="ph"><button class="back" id="back">← All warnings</button>
+      <div class="site-h">
+        <div><h2>${esc(s.title)}</h2><span class="fa" lang="fa">${esc(s.faName)}</span><div class="sub">${typeTxt}</div>${dayNote}</div>
+        <span class="badge" style="border-color:${LV[s.level].color}">${icon(s.level, 15)} ${LV[s.level].name}</span>
+      </div></div>
+    <div class="detail">
     <p class="headline">${headline(s)}</p>
     ${impactBox(s)}
     ${s.dam ? `<p class="dam">${icon(0, 12, true)}<span>Below ${esc(s.dam)}: the real flow here also depends on reservoir releases, which the model only approximates.</span></p>` : ''}
     <div class="clegend">${s.kind === 'river'
-      ? `<span><i class="sw ln" style="background:#a3bcc7"></i>model flow, past 14 days</span><span><i class="sw ln" style="background:#38bdf8"></i>median forecast</span><span><i class="sw bd"></i>middle 50% / 80% of members</span>`
-      : `<span><i class="sw bar"></i>median daily rain, all models</span><span><i class="sw wh"></i>middle 80% of members</span>`}
-      <span><i class="sw ln" style="background:${LV[1].color}"></i><i class="sw ln" style="background:${LV[2].color};margin-left:-3px"></i><i class="sw ln" style="background:${LV[3].color};margin-left:-3px"></i>2-, 5-, 20-year levels</span></div>
-    <svg id="chart" viewBox="0 0 640 310" role="img" aria-label="Forecast chart"></svg>
-    <svg id="probs" viewBox="0 0 640 ${22 + rainRows * 23 + (s.kind === 'rain' ? 14 : 0)}" role="img" aria-label="Daily exceedance probabilities"></svg>
-    ${s.kind === 'rain' && s.models && s.models.length ? `<svg id="models" viewBox="0 0 640 ${30 + s.models.length * 17}" role="img" aria-label="Alert level of each model by day"></svg>` : ''}
-    <div class="facts">${facts}</div>`;
+      ? `<span><i class="sw ln" style="background:#a3bcc7"></i>model flow, past 14 days</span><span><i class="sw ln" style="background:#38bdf8"></i>median forecast</span><span><i class="sw bd"></i>middle 50% / 80%</span>`
+      : `<span><i class="sw bar"></i>median daily rain, all models</span><span><i class="sw wh"></i>middle 80%</span>`}
+      <span><i class="sw ln" style="background:${LV[1].color}"></i><i class="sw ln" style="background:${LV[2].color};margin-left:-3px"></i><i class="sw ln" style="background:${LV[3].color};margin-left:-3px"></i>2-, 5-, 20-year</span></div>
+    <svg id="chart" viewBox="0 0 ${CW} ${CH}" role="img" aria-label="Forecast chart"></svg>
+    <svg id="probs" viewBox="0 0 ${CW} ${22 + rows * 23 + (s.kind === 'rain' ? 14 : 0)}" role="img" aria-label="Daily exceedance probabilities"></svg>
+    ${s.kind === 'rain' && s.models && s.models.length ? `<svg id="models" viewBox="0 0 ${CW} ${30 + s.models.length * 17}" role="img" aria-label="Alert level of each model by day"></svg>` : ''}
+    <div class="facts">${facts}</div></div>`;
+  document.getElementById('back').addEventListener('click', () => { state.sel = null; setHash(); drawSites(); renderPanel(); });
   if (s.kind === 'river') riverChart(s); else rainChart(s);
   probStrip(s);
   if (s.kind === 'rain' && s.models && s.models.length) modelsChart(s);
 }
 
-const CM = { l: 54, r: 74, t: 26, b: 26 }, CW = 640, CH = 310;
+const CM = { l: 56, r: 66, t: 26, b: 26 }, CW = 540, CH = 300;
 // Scale to the data so a calm forecast stays readable; pull the 2-year line in only when it is close
 const chartTop = (dataMax, rp2) => { const top = Math.max(dataMax * 1.15, rp2 * 0.02, 1e-3); return rp2 <= top * 2.5 ? Math.max(top, rp2 * 1.08) : top; };
 function thresholdLines(g, s, y, x0, x1, yMax) {
+  // GloFAS-style return-period bands behind the forecast: yellow above 2-yr, orange above 5-yr, red above 20-yr
+  [['rp2', 'rp5', 1], ['rp5', 'rp20', 2], ['rp20', null, 3]].forEach(([lo, hi, l]) => {
+    const a = s.thr[lo], b = hi ? Math.min(s.thr[hi], yMax) : yMax;
+    if (a < yMax && b > a) g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(b)).attr('height', y(a) - y(b)).attr('fill', LV[l].color).attr('fill-opacity', 0.07);
+  });
   ['rp2', 'rp5', 'rp20'].forEach((k) => {
     const v = s.thr[k], c = LV[RP_LVL[k]].color;
     if (v <= yMax) {
@@ -553,6 +696,8 @@ function riverChart(s) {
   const line = d3.line().x((d) => x(d.t)).y((d) => y(d.q)).curve(d3.curveMonotoneX);
   svg.append('path').datum([...pd, { t: fd[0].t, q: s.fc.p50[0] }]).attr('d', line).attr('fill', 'none').attr('stroke', '#a3bcc7').attr('stroke-width', 2).attr('stroke-linecap', 'round');
   svg.append('path').datum(fd.map((d) => ({ t: d.t, q: s.fc.p50[d.i] }))).attr('d', line).attr('fill', 'none').attr('stroke', '#38bdf8').attr('stroke-width', 2).attr('stroke-linecap', 'round');
+  const selI = dayIndex(s);
+  if (selI != null && selI < nF) svg.append('rect').attr('x', x(dayDate(s.fcStart, selI)) - 6).attr('width', 12).attr('y', CM.t).attr('height', CH - CM.b - CM.t).attr('fill', '#e4f0f4').attr('fill-opacity', 0.07);
   const pk = s.peakDay;
   svg.append('circle').attr('cx', x(dayDate(s.fcStart, pk))).attr('cy', y(s.fc.p50[pk])).attr('r', 4.5).attr('fill', '#38bdf8').attr('stroke', '#0a1b26').attr('stroke-width', 2);
   hoverLayer(svg, s, x, y, [...pd.map((d) => ({ t: d.t, past: d.q })), ...fd.map((d) => ({ t: d.t, i: d.i }))]);
@@ -577,6 +722,8 @@ function rainChart(s) {
     svg.append('rect').attr('x', xs).attr('y', CM.t).attr('width', CW - CM.r - xs).attr('height', CH - CM.b - CM.t).attr('fill', 'rgba(255,255,255,.025)');
     svg.append('text').attr('class', 'cap').attr('x', xs + 5).attr('y', CH - CM.b - 6).text('lower skill — not used for alerts');
   }
+  const selI = dayIndex(s);
+  if (selI != null && selI < nF) svg.append('rect').attr('x', x(selI) - x.step() * x.padding() / 2).attr('width', x.step()).attr('y', CM.t).attr('height', CH - CM.b - CM.t).attr('fill', '#e4f0f4').attr('fill-opacity', 0.06);
   thresholdLines(svg, s, y, CM.l, CW - CM.r, yTop);
   const bw = Math.min(24, x.bandwidth());
   const g = svg.append('g');
@@ -631,8 +778,8 @@ function probStrip(s) {
   if (s.kind === 'rain' && s.fcw) groups.push({ label: 'wet ground', get: (k) => s.fc[k].map((_, i) => Math.max(s.fcw[k][i] ?? 0, s.fcw3 ? (s.fcw3[k][i] ?? 0) : 0)), tag: 'wet-ground ' });
   const rh = 20;
   svg.append('text').attr('class', 'cap').attr('x', CM.l).attr('y', 9).text(s.kind === 'rain'
-    ? 'Chance of passing each level, all models combined: 1-day rain, 3-day rain, rain on wet ground or snowmelt'
-    : 'Share of ensemble members above each threshold, per forecast day');
+    ? 'Chance of passing each level, all models combined'
+    : 'Share of ensemble members above each level, per day');
   let yy = 16;
   groups.forEach((gr, gi) => {
     if (gi) yy += 7;
@@ -676,52 +823,54 @@ function modelsChart(s) {
     .call((g) => g.select('.domain').remove());
 }
 
-// ---------- table ----------
+// ---------- table below the app ----------
 const table = document.getElementById('table');
 function renderTable() {
-  const rows = sites.filter((s) => state.rows === 'all' || s.level > 0).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+  const rows = sites.filter(shown).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
   const pb = (p, l) => `<span class="pbar"><i style="width:${Math.round(p * 100)}%;background:${LV[l].color}"></i></span>${pct(p)}`;
   const when = (s) => s.firstAlertDay == null ? '<span style="color:var(--ink-3)">–</span>' : fmtShort(dayDate(s.fcStart, s.firstAlertDay));
-  const ppl = (s) => s.pop && s.pop.n != null ? (s.pop.n >= 1e6 ? `${(s.pop.n / 1e6).toFixed(1)} M` : fmtNum(s.pop.n)) : '–';
   const agree = (s) => s.agree ? `${s.agree.alerting}/${s.agree.total}` : '<span style="color:var(--ink-3)">–</span>';
   table.innerHTML = `<thead><tr><th>Level</th><th>Site</th><th>Type</th><th>Province</th><th>Alert from</th><th class="num">People</th><th class="num">Models</th><th class="num">Peak median</th><th class="num">P(&gt;2-yr)</th><th class="num">P(&gt;5-yr)</th><th class="num">P(&gt;20-yr)</th></tr></thead><tbody>` +
-    (rows.length ? rows.map((s) => `<tr data-key="${s.kind}:${s.id}" aria-selected="${state.sel === s}" tabindex="0">
+    rows.map((s) => `<tr data-key="${s.kind}:${s.id}" tabindex="0">
       <td><span class="lvl">${icon(s.level, 13, s.kind === 'rain')}${LV[s.level].name}</span></td>
       <td>${esc(s.title)}<span class="fa" lang="fa">${esc(s.faName)}</span></td>
       <td>${s.kind === 'river' ? 'River' : 'Rain'}${s.boosted ? ' <span title="raised by wet ground or snowmelt" style="color:var(--teal)">+ground</span>' : ''}</td><td>${esc(s.prov)}</td><td>${when(s)}</td>
-      <td class="num">${ppl(s)}</td><td class="num">${agree(s)}</td>
+      <td class="num">${fmtPeople(s.pop && s.pop.n)}</td><td class="num">${agree(s)}</td>
       <td class="num">${s.kind === 'river' ? `${fmtX(s.fc.p50[s.peakDay] / s.thr.rp2)} <span style="color:var(--ink-3)">2-yr</span>` : `${fmtNum(s.fc.p50[s.peakDay])} <span style="color:var(--ink-3)">mm</span>`}</td>
-      <td class="num">${pb(s.maxProb.rp2, 1)}</td><td class="num">${pb(s.maxProb.rp5, 2)}</td><td class="num">${pb(s.maxProb.rp20, 3)}</td></tr>`).join('')
-      : `<tr><td colspan="11" style="color:var(--ink-3);padding:18px 10px">No site is at Moderate or above today.</td></tr>`) + '</tbody>';
+      <td class="num">${pb(s.maxProb.rp2, 1)}</td><td class="num">${pb(s.maxProb.rp5, 2)}</td><td class="num">${pb(s.maxProb.rp20, 3)}</td></tr>`).join('') + '</tbody>';
   table.querySelectorAll('tbody tr[data-key]').forEach((tr) => {
-    const go = () => select(byKey.get(tr.dataset.key));
+    const go = () => { select(byKey.get(tr.dataset.key), { zoomIn: true }); document.querySelector('.app').scrollIntoView({ behavior: 'smooth' }); };
     tr.addEventListener('click', go);
     tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
   });
 }
 
-function select(s) {
-  state.sel = s;
-  try { if (location.hash !== `#${s.kind}-${s.id}`) history.replaceState(null, '', `#${s.kind}-${s.id}`); } catch (e) { /* sandboxed frame */ }
-  renderDetail(s); drawSites(); renderTable();
+// ---------- selection, search, address ----------
+function setHash() {
+  const h = state.sel ? `#${state.sel.kind}-${state.sel.id}` : '';
+  try { history.replaceState(null, '', h || location.pathname + location.search); } catch (e) { /* sandboxed frame */ }
 }
-document.querySelectorAll('[data-layer]').forEach((b) => b.addEventListener('click', () => {
-  const k = b.dataset.layer; state.layers[k] = !state.layers[k]; b.setAttribute('aria-pressed', state.layers[k]); drawSites();
-}));
-document.querySelectorAll('[data-rows]').forEach((b) => b.addEventListener('click', () => {
-  state.rows = b.dataset.rows;
-  document.querySelectorAll('[data-rows]').forEach((o) => o.setAttribute('aria-pressed', o === b)); renderTable();
-}));
+function select(s, { zoomIn = false } = {}) {
+  if (!s) return;
+  state.sel = s; setHash();
+  if (zoomIn) zoomTo(s);
+  drawSites(); renderDetail(s); panel.scrollTop = 0;
+}
+document.getElementById('home').addEventListener('click', (e) => { e.preventDefault(); state.sel = null; setHash(); stopPlay(); setDay('all'); svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity); });
+const q = document.getElementById('q');
+document.getElementById('sitelist').innerHTML = sites.map((s) => `<option value="${esc(s.title)}">${s.kind === 'river' ? 'River' : 'City'} · ${esc(s.prov)} · ${esc(s.faName)}</option>`).join('');
+q.addEventListener('change', () => {
+  const v = q.value.trim().toLowerCase();
+  if (!v) return;
+  const s = sites.find((x) => x.title.toLowerCase() === v) || sites.find((x) => x.title.toLowerCase().includes(v) || (x.faName || '').includes(q.value.trim()));
+  if (s) { select(s, { zoomIn: true }); q.value = ''; q.blur(); }
+});
 
-// initial selection: link in the address, else the strongest signal
-const fromHash = location.hash.slice(1).replace('-', ':');
-const initial = byKey.get(fromHash) || [...sites].sort((a, b) => b.score - a.score || (b.nowRatio || 0) - (a.nowRatio || 0))[0];
-if (sites.some((s) => s.level > 0)) {
-  state.rows = 'alerts';
-  document.querySelectorAll('[data-rows]').forEach((o) => o.setAttribute('aria-pressed', o.dataset.rows === 'alerts'));
-}
-renderTable(); drawSites(); if (initial) select(initial);
-addEventListener('hashchange', () => { const s = byKey.get(location.hash.slice(1).replace('-', ':')); if (s && s !== state.sel) select(s); });
+const fromHash = () => byKey.get(location.hash.slice(1).replace('-', ':'));
+renderDays(); drawMap(); renderTable();
+const initial = fromHash();
+if (initial) select(initial); else renderPanel();
+addEventListener('hashchange', () => { const s = fromHash(); if (s && s !== state.sel) select(s); });
 })();
 </script>
 </body>
