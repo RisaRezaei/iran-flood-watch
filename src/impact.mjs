@@ -74,9 +74,12 @@ export function impactOf(s, kind, levels) {
   const p = levelChance(s, levels);
   const day = addDays(s.fcStart, s.levelDay), from = addDays(s.fcStart, s.firstAlertDay ?? s.levelDay);
   const rp = { 1: 2, 2: 5, 3: 20 }[s.level];
+  const wet = /wet ground/.test(s.trigger || '');
   const what = kind === 'river'
     ? { en: `the ${rp}-year flood flow`, fa: `دبی سیل ${faNum(rp)} ساله` }
-    : { en: `the ${rp}-year rainfall`, fa: `بارش ${faNum(rp)} ساله` };
+    : wet
+      ? { en: `the ${rp}-year level for rain on wet ground or snowmelt`, fa: `سطح ${faNum(rp)} ساله باران روی خاک مرطوب یا ذوب برف` }
+      : { en: `the ${rp}-year rainfall`, fa: `بارش ${faNum(rp)} ساله` };
   out.chance = p;
   out.headline = {
     en: `${LEVEL_NAMES[s.level]} ${kind === 'river' ? 'river-flood' : 'flash-flood'} warning: ${Math.round(p * 100)}% chance of passing ${what.en} on ${enDate(day)}` +
