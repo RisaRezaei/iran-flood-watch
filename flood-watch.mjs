@@ -3,7 +3,7 @@
 // Iran Flood Watch — update run.
 //   node flood-watch.mjs                 fetch the newest forecasts → docs/index.html + docs/data/* + feeds
 //   node flood-watch.mjs --if-new        only fetch what has a new model run; exits quietly when nothing
-//                                        is new (meant for a frequent trigger, e.g. every 10 minutes)
+//                                        is new (meant for a frequent schedule)
 //   node flood-watch.mjs --out site      write somewhere else
 //   node flood-watch.mjs --cache dir     where each rain model's last run is kept (default .cache)
 //   node flood-watch.mjs --from-json f   re-render a saved snapshot without fetching

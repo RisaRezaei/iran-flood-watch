@@ -192,7 +192,7 @@ export function rss(snap) {
     '    <language>en</language>',
     '    <copyright>© 2026 Parisa Abbasalizadehrezaei. All rights reserved.</copyright>',
     `    <lastBuildDate>${rfc822(snap.generated)}</lastBuildDate>`,
-    '    <ttl>10</ttl>',
+    '    <ttl>15</ttl>',
     ...items.map((i) => i.xml),
     '  </channel>',
     '</rss>',

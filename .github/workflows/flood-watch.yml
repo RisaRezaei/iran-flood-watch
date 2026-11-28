@@ -1,9 +1,9 @@
 name: Flood watch
 
 # Checks whether GloFAS or any of the seven rain ensembles has published a new run and updates
-# only then. An external scheduler starts this every 10 minutes (workflow_dispatch), so a warning
-# appears within about 10 minutes of the forecast that contains it; GitHub's own hourly schedule
-# stays as a backup, because GitHub often delays or skips scheduled runs.
+# only then. GitHub's schedule starts it four times an hour; GitHub often delays or skips
+# scheduled runs, so more slots mean fewer long gaps. An outside scheduler can also start it
+# (workflow_dispatch) to make the timing regular.
 on:
   workflow_dispatch:
     inputs:
@@ -12,7 +12,7 @@ on:
         type: boolean
         default: false
   schedule:
-    - cron: '52 * * * *'
+    - cron: '7,22,37,52 * * * *'
 
 permissions:
   contents: write

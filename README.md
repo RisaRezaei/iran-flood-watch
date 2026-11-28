@@ -1,6 +1,6 @@
 # Iran Flood Watch · پایش و هشدار سیل ایران
 
-A flood early-warning dashboard for Iran, built only from open data. It watches 29 river reaches and 27 flash-flood-prone cities, checks for new model runs every 10 minutes, and sends an alert as soon as a site reaches a warning level or moves up a level. Each alert says how many people live nearby and what to do, in English and Persian, and is published in the international CAP alert format.
+A flood early-warning dashboard for Iran, built only from open data. It watches 29 river reaches and 27 flash-flood-prone cities, checks for new model runs four times an hour, and sends an alert as soon as a site reaches a warning level or moves up a level. Each alert says how many people live nearby and what to do, in English and Persian, and is published in the international CAP alert format.
 
 [![Spring 2019 flood replay on 26 March: warning levels across Iran and the Kor river at Marvdasht passing its 20-year flood](docs/preview.png)](https://risarezaei.github.io/iran-flood-watch/replay-2019.html#d-2019-03-26)
 
@@ -46,7 +46,7 @@ For rain the share is model-weighted. A rain site takes the highest level of its
 **Feeds.** Alerts are published as CAP 1.2 messages ([`docs/cap/index.atom`](https://risarezaei.github.io/iran-flood-watch/cap/index.atom)), the OASIS Common Alerting Protocol that national warning services use. They follow each alert through Alert, Update and Cancel, in English and Persian. There is also an RSS feed ([`docs/feed.xml`](https://risarezaei.github.io/iran-flood-watch/feed.xml)).
 
 **Timing:**
-- An external scheduler starts the update every 10 minutes. It finishes in seconds when nothing is new, and downloads only the model that changed when something is. GitHub's own hourly schedule stays as a backup.
+- GitHub's schedule starts the check four times an hour. It finishes in seconds when nothing is new, and downloads only the model that changed when something is. GitHub sometimes delays or skips scheduled runs, so a new forecast can take longer than 15 minutes to appear. Any scheduler that calls the workflow (for example every 10 minutes) makes this regular.
 - The page shows which model runs it used, in Tehran time, and an "out of date" banner if the river run is older than 48 hours or fewer than four rain models are current.
 - Each alert lists the day it starts and the day it peaks.
 
@@ -82,7 +82,7 @@ Each rain model's last run is kept in `.cache/`, so a routine update downloads o
 
 This repository runs itself on GitHub Actions and publishes to GitHub Pages from `main`, folder `/docs`:
 
-- `.github/workflows/flood-watch.yml` runs when the external 10-minute trigger calls it, and hourly as a backup. It updates only when a model has a new run, and keeps the model cache between runs.
+- `.github/workflows/flood-watch.yml` runs four times an hour (and whenever it is started by hand or by an outside scheduler). It updates only when a model has a new run, and keeps the model cache between runs.
 - Every new or rising alert opens a GitHub issue, which GitHub emails to the repository owner.
 - To start an update by hand: **Actions → Flood watch → Run workflow**.
 - `.github/workflows/rebuild.yml` rebuilds thresholds and population figures. It runs daily: it finishes any build that stopped at the Open-Meteo daily limit, and builds the GloFAS v5 thresholds once v5 is on Open-Meteo, after which the river forecasts switch to v5.
